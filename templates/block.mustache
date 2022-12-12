@@ -42,11 +42,11 @@
     </ul>
 {{#js}}
     require(['block_slider/glide'], function(glide) {
-        glide('#slider-{{uniqid}} .glide', {
+        glide('#envf-slider-{{uniqid}} .glide', {
                 type: 'carousel',
                 startAt: 0,
                 perView: 4,
-                gap: 20,
+                gap: 0,
                 autoplay: {{ carousseldelay }}
             }
         );
