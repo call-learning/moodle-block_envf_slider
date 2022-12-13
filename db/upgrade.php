@@ -15,18 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Upgrade
  *
- * @package   block_envf_slider
- * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     block_envf_slider
+ * @copyright   2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Upgrade the envf_slider database.
+ *
+ * @param int $oldversion The version number of the plugin that was installed.
+ * @return boolean
+ */
+function xmldb_block_envf_slider_upgrade($oldversion) {
+    // Rss_thumbnails savepoint reached.
+    upgrade_block_savepoint(true, 2022111004, 'rss_thumbnails');
 
-$plugin->version    = 2022121200;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires   = 2012112900;        // Requires this Moodle version.
-$plugin->release    = 1.0;
-$plugin->maturity   = MATURITY_ALPHA;
-$plugin->component  = 'block_envf_slider'; // Full name of the plugin (used for diagnostics).
-$plugin->dependencies = [];
+    // Automatically generated Moodle v4.0.0 release upgrade line.
+    // Put any upgrade step following this.
+
+    return true;
+}

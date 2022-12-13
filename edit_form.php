@@ -50,45 +50,37 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @return stdClass an object containing the different fields to configure the slide
      */
     private function add_slide($mform) {
-        $repeatedarray = [];
-        $repeatedoptions = [];
-
+        $slide = new stdClass();
         // Slide Title.
-        $repeatedarray[] = $mform->addElement(
+        $slide->title = $mform->addElement(
             'text',
             'config_slidetitle',
             get_string('config:slidetitle', 'block_envf_slider')
         );
-        $repeatedoptions['config_slidetitle']['type'] = PARAM_TEXT;
+        $mform->setType('config_slidetitle', PARAM_TEXT);
 
         // Slide desctiption.
-        $repeatedarray[] = $mform->addElement(
+        $slide->description = $mform->addElement(
             'textarea',
             'config_slidedescription',
             get_string('config:slidedescription', 'block_envf_slider')
         );
-        $repeatedoptions['config_slidedescription']['type'] = PARAM_TEXT;
+        $mform->setType('config_slidedescription', PARAM_TEXT);
 
         // Slide background image.
-        $repeatedarray[] = $mform->addElement(
+        $slide->image = $mform->addElement(
             'filemanager',
             'config_thumbimage',
             get_string('config:thumbimage', 'block_thumblinks_action')
         );
 
         // Button to remove a slide.
-        $repeatedarray[] = $mform->addElement(
+        $slide->removebtn = $mform->addElement(
             'button',
             'remove_slide',
             get_string('remove_slide')
         );
 
-        // TODO finish this.
-        // TODO seems to be a bad use of repeat elements.
-        $this->repeat_elements(
-            $repeatedarray,
-
-        );
     }
 
     /**
