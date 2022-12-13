@@ -15,29 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class block_envf_slider\output\block
+ * Contains class block_envf_slider\output\renderer
  *
  * @package   block_envf_slider
- * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
+ * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 namespace block_envf_slider\output;
 
-use renderable;
-use renderer_base;
-use templatable;
+use plugin_renderer_base;
 
 /**
- * Class to represent a ENVF slider block.
+ * Renderer for ENVF slider block, any renderer for an ENVF slider Block should extend this class.
  *
  * @package   block_envf_slider
- * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
+ * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block implements renderable, templatable {
+class renderer extends plugin_renderer_base {
 
-    public function export_for_template(renderer_base $output) {
-        // TODO: Implement export_for_template() method.
-    }
 }
