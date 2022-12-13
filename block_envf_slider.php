@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_envf_slider\output\block;
 
 /**
  * Class block_envf_slider
@@ -36,26 +37,34 @@ class block_envf_slider extends block_base {
         $this->title = get_string('pluginname', 'block_envf_slider');
 
         // Initialise content.
-        $this->content = new stdClass();
-        $this->content->text = '';
-        $this->content->footer = '';
+        $this->content = (object) [
+            'text' => ''
+        ];
     }
 
-    public function get_content() {
-        global $DB;
+    /**
+     * Creates and returns all the content of the block.
+     */
+    public function get_content(): stdObject {
 
         if ($this->content != null && !empty($this->content->text)) {
             return $this->content;
         }
+
         $this->page->requires->css(
             new moodle_url('/blocks/envf_slider/js/glide/dist/css/glide.core' .
                 (debugging() ? '.min' : '') . '.css'));
-        return null;
 
         if (!$this->config_is_valid()) {
             $this->content->text = get_string("invalidconfig", "block_rss_thumbnails");
             return $this->content;
         }
+
+        $renderer = $this->page->get_renderer('block_envf_slider');
+        $block = new block();
+
+        $this->content->text = $renderer->render($block);
+        return $this->content;
     }
 
     /**
@@ -63,7 +72,7 @@ class block_envf_slider extends block_base {
      *
      * @return bool true if the configuration of the block is valid, false if it's not.
      */
-    public function config_is_valid() {
+    public function config_is_valid(): bool {
         // TODO implement config_is_valid function.
         return true;
     }

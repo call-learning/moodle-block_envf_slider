@@ -50,10 +50,13 @@ class block_envf_slider_edit_form extends block_edit_form {
         $this->mform = $mform;
         $this->amd_requires();
 
+        // Gets all the slides previously added.
         $slides = $this->get_current_slides();
         foreach ($slides as $slide) {
             $this->display_slide($slide);
         }
+
+        // Button to ad a new slide.
         $addnewslidebtnname = 'addnewslide';
         $mform->addElement('submit', $addnewslidebtnname, get_string("config:addnewslide"));
         $mform->registerNoSubmitButton($addnewslidebtnname);
@@ -74,13 +77,11 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @return stdClass an object containing the different fields to configure the slide
      */
     private function add_slide() {
-        $mform = $this->mform;
-
         $slide = new stdClass();
 
         // Slide id.
         $id = $this->get_slide_count();
-        $slide->id = $mform->addElement(
+        $slide->id = $this->mform->addElement(
             'hidden',
             'config_slideid',
             $id
@@ -88,30 +89,30 @@ class block_envf_slider_edit_form extends block_edit_form {
         $slide->deleteform = new delete_slide_form($id);
 
         // Slide Title.
-        $slide->title = $mform->addElement(
+        $slide->title = $this->mform->addElement(
             'text',
             'config_slidetitle',
             get_string('config:slidetitle', 'block_envf_slider')
         );
-        $mform->setType('config_slidetitle', PARAM_TEXT);
+        $this->mform->setType('config_slidetitle', PARAM_TEXT);
 
         // Slide desctiption.
-        $slide->description = $mform->addElement(
+        $slide->description = $this->mform->addElement(
             'textarea',
             'config_slidedescription',
             get_string('config:slidedescription', 'block_envf_slider')
         );
-        $mform->setType('config:slidedescription', PARAM_TEXT);
+        $this->mform->setType('config:slidedescription', PARAM_TEXT);
 
         // Slide background image.
-        $slide->image = $mform->addElement(
+        $slide->image = $this->mform->addElement(
             'filemanager',
             'config_thumbimage',
             get_string('config:thumbimage', 'block_thumblinks_action')
         );
 
         // Button to remove a slide.
-        $slide->removebtn = $mform->addElement(
+        $slide->removebtn = $this->mform->addElement(
             'submit',
             'remove_slide',
             get_string('config:removeslide')

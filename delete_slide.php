@@ -22,8 +22,18 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Function deleting the slide with the given id.
+ * Need to see if it has to rearrange other slides ids in order to avoid bugs.
+ *
+ * @param $slideid
+ * @return void
+ */
 function delete_slide($slideid) {
     // Todo implement delete_slide method.
 }
+
 $slideid = required_param('slideid', PARAM_INT);
 delete_slide($slideid);
