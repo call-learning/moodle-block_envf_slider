@@ -33,14 +33,39 @@
 class block_envf_slider extends block_base {
 
     public function init() {
+        $this->title = get_string('pluginname', 'block_envf_slider');
 
+        // Initialise content.
+        $this->content = new stdClass();
+        $this->content->text = '';
+        $this->content->footer = '';
     }
 
     public function get_content() {
+        global $DB;
+
+        if ($this->content != null && !empty($this->content->text)) {
+            return $this->content;
+        }
         $this->page->requires->css(
-        new moodle_url('/blocks/envf_slider/js/glide/dist/css/glide.core' .
-        (debugging() ? '.min' : '') . '.css'));
+            new moodle_url('/blocks/envf_slider/js/glide/dist/css/glide.core' .
+                (debugging() ? '.min' : '') . '.css'));
         return null;
+
+        if (!$this->config_is_valid()) {
+            $this->content->text = get_string("invalidconfig", "block_rss_thumbnails");
+            return $this->content;
+        }
+    }
+
+    /**
+     * Checks wether the configuration of the block is valid or not.
+     *
+     * @return bool true if the configuration of the block is valid, false if it's not.
+     */
+    public function config_is_valid() {
+        // TODO implement config_is_valid function.
+        return true;
     }
 
 }

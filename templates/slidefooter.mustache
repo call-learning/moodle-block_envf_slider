@@ -30,33 +30,9 @@
 
     Example context (json):
     {
-        "items":
-        [
-            "imageurl": "https://example.com"
-        ]
+    "imageurl": "https://example.com"
     }
+
 }}
-<div id="block-envf-slider-{{uniqid}}" class="block-slider">
-    <ul class="container-fluid">
-        {{#slide}}
-            {{< block_envf_slider/slide }}{{/block_envf_slider/slide}}
-        {{/slide}}
-    </ul>
-    <ul>
-        {{#slide}}
-            {{< block_envf_slider/slidefooter}}{{/block_envf_slider/slidefooter}}
-        {{/slide}}
-    </ul>
-{{#js}}
-    require(['block_slider/glide'], function(glide) {
-        glide('#envf-slider-{{uniqid}} .glide', {
-                type: 'carousel',
-                startAt: 0,
-                perView: 4,
-                gap: 0,
-                autoplay: {{ carousseldelay }}
-            }
-        );
-    });
-{{/js}}
-</div>
+<li class="slidefooter-item">
+</li>

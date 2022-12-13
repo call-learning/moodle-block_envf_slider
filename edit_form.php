@@ -22,35 +22,71 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_envf_slider\delete_slide_form;
+
 /**
  * Class block_envf_slider_edit_form
  *
+ *
+ * @package    block_envf_slider
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_envf_slider_edit_form extends block_edit_form {
 
     /**
+     * @var MoodleQuickForm $mform the formulary object passed in {@see block_envf_slider_edit_form::specific_definition()}
+     * to be able to get it int the method {@see block_envf_slider_edit_form::add_slide()}
+     */
+    private MoodleQuickForm $mform;
+
+    /**
      * Form definition
      *
-     * @param moodleform $mform
+     * @param $mform
      * @throws coding_exception
      */
     protected function specific_definition($mform) {
+        $this->mform = $mform;
+        $this->amd_requires();
 
-        $slides = [];
-        $mform->set_data();
-        $mform->addElement('button', 'add_new_slide', get_string("add_new_slide"));
+        $slides = $this->get_current_slides();
+        foreach ($slides as $slide) {
+            $this->display_slide($slide);
+        }
+        $addnewslidebtnname = 'addnewslide';
+        $mform->addElement('submit', $addnewslidebtnname, get_string("config:addnewslide"));
+        $mform->registerNoSubmitButton($addnewslidebtnname);
+    }
+
+    /**
+     * Whenever a no submit button is pressed ( this could happen just with the addslide button), the form will add a new slide.
+     *
+     * @return void
+     */
+    public function no_submit_button_pressed() {
+        $this->add_slide();
     }
 
     /**
      * Adds a new slide into the edit form of the block.
      *
-     * @param moodleform $mform The edit form itself
      * @return stdClass an object containing the different fields to configure the slide
      */
-    private function add_slide($mform) {
+    private function add_slide() {
+        $mform = $this->mform;
+
         $slide = new stdClass();
+
+        // Slide id.
+        $id = $this->get_slide_count();
+        $slide->id = $mform->addElement(
+            'hidden',
+            'config_slideid',
+            $id
+        );
+        $slide->deleteform = new delete_slide_form($id);
+
         // Slide Title.
         $slide->title = $mform->addElement(
             'text',
@@ -65,7 +101,7 @@ class block_envf_slider_edit_form extends block_edit_form {
             'config_slidedescription',
             get_string('config:slidedescription', 'block_envf_slider')
         );
-        $mform->setType('config_slidedescription', PARAM_TEXT);
+        $mform->setType('config:slidedescription', PARAM_TEXT);
 
         // Slide background image.
         $slide->image = $mform->addElement(
@@ -76,52 +112,40 @@ class block_envf_slider_edit_form extends block_edit_form {
 
         // Button to remove a slide.
         $slide->removebtn = $mform->addElement(
-            'button',
+            'submit',
             'remove_slide',
-            get_string('remove_slide')
+            get_string('config:removeslide')
         );
-
+        return $slide;
     }
 
     /**
-     * Sets data for the existing slides
+     * Calls all the amd fuctions we need.
      *
-     * @param array|stdClass $defaults
-     *//**
-    public function set_data($defaults) {
-        parent::set_data($defaults);
-        // Restore filemanager fields.
-        // This is a bit of a hack working around the issues of the block.
-        // When using set_data, we set the file data to the real file as it reads it
-        // from the block config,
-        // not the draft manager file. This can be rectified by a second call to set_data.
-        // We try to get the previously submitted file.
-        if (!empty($this->block->config) && is_object($this->block->config)) {
-            $filefields = new stdClass();
-            for ($index = 0; $index < $this->get_slide_count(); $index++) {
-                $fieldname = 'config_slideimage';
-                $filefields->{$fieldname}[$index] = [];
-                // Here we could try to use the file_get_submitted_draft_itemid, but it expects to have an itemid defined
-                // Which is not what we have right now, we just have a flat list.
-                $param = optional_param_array($fieldname, 0, PARAM_INT);
-                $draftitemid = null;
-                if (!empty($param[$index])) {
-                    $draftitemid = $param[$index];
-                }
-                file_prepare_draft_area(
-                    $draftitemid,
-                    $this->block->context->id,
-                    'block_thumblinks_action',
-                    'images',
-                    $index,
-                    $this->get_file_manager_options()
-                );
+     * @return void
+     */
+    private function amd_requires() {
+        $this->page->requires->js_call_amd('block_envf_slider/editform', 'calladdnewslide');
+    }
 
-                $filefields->{$fieldname}[$index] = $draftitemid;
-            }
-            moodleform::set_data($filefields);
-        }
-    }*/
+    /**
+     * Gets all the slides previously added.
+     *
+     * @return array an array containing a stdclass for each slide under this format :
+     * <pre>
+     * "slide": {
+     *      "id": 0,
+     *      "title": "Title of the slide",
+     *      "description": "Description of the slide",
+     *      "image": "image of the slide"
+     * }
+     * </pre>
+     *
+     */
+    private function get_current_slides(): array {
+        // Todo implement get_current_slides() and complete it's php doc.
+        return [];
+    }
 
     /**
      * Get number of repeats.
@@ -145,157 +169,21 @@ class block_envf_slider_edit_form extends block_edit_form {
     }
 
     /**
-     * Method to add a repeating group of elements to a form.
+     * A method that displays a fiven exisitng slide by adding to the formulary.
      *
-     * We can also remove the last element of the list.
-     *
-     * @param array $elementobjs Array of elements or groups of elements that are to be repeated
-     * @param int $repeats no of times to repeat elements initially
-     * @param array $options a nested array. The first array key is the element name.
-     *    the second array key is the type of option to set, and depend on that option,
-     *    the value takes different forms.
-     *         'default'    - default value to set. Can include '{no}' which is replaced by the repeat number.
-     *         'type'       - PARAM_* type.
-     *         'helpbutton' - array containing the helpbutton params.
-     *         'disabledif' - array containing the disabledIf() arguments after the element name.
-     *         'rule'       - array containing the addRule arguments after the element name.
-     *         'expanded'   - whether this section of the form should be expanded by default. (Name be a header element.)
-     *         'advanced'   - whether this element is hidden by 'Show more ...'.
-     * @param string $repeathiddenname name for hidden element storing no of repeats in this form
-     * @param string $addfieldsname name for button to add more fields
-     * @param int $addfieldsno how many fields to add at a time
-     * @param string $addstring name of button, {no} is replaced by no of blanks that will be added.
-     * @param bool $addbuttoninside if true, don't call closeHeaderBefore($addfieldsname). Default false.
-     * @param string $deletefieldsname name of the button that will trigger the deletion of the repeat element
-     * @param string $deletestring name for button to remove the last field
-     * @return int no of repeats of element in this page
-     * @throws coding_exception
+     * @param stdClass $slide a slide under the form given by {@see block_envf_slider_edit_form::get_current_slides()}:
+     * <pre>
+     * "slide": {
+     *      "id": 0,
+     *      "title": "Title of the slide",
+     *      "description": "Description of the slide",
+     *      "image": "image of the slide"
+     * }
+     * </pre>
+     * @return void
      */
-    public function repeat_elements(
-        $elementobjs,
-        $repeats,
-        $options,
-        $repeathiddenname,
-        $addfieldsname,
-        $addfieldsno = 5,
-        $addstring = null,
-        $addbuttoninside = false,
-        $deletefieldsname = null,
-        $deletestring = null
-    ): int {
-        $repeats = $this->optional_param($repeathiddenname, $repeats, PARAM_INT);
-        if ($deletefieldsname) {
-            $removefields = $this->optional_param($deletefieldsname, '', PARAM_TEXT);
-            if (!empty($removefields)) {
-                $repeats -= 1; // Remove last course.
-            }
-            if ($deletestring === null) {
-                $deletestring = get_string('delete', 'moodle');
-            }
-        }
-        if ($addstring === null) {
-            $addstring = get_string('addfields', 'form', $addfieldsno);
-        } else {
-            $addstring = str_ireplace('{no}', $addfieldsno, $addstring);
-        }
-
-        $addfields = $this->optional_param($addfieldsname, '', PARAM_TEXT);
-        if (!empty($addfields)) {
-            $repeats += $addfieldsno;
-        }
-        $mform =& $this->_form;
-        $mform->registerNoSubmitButton($addfieldsname);
-        $mform->addElement('hidden', $repeathiddenname, $repeats);
-        $mform->setType($repeathiddenname, PARAM_INT);
-        // Value not to be overridden by submitted value.
-        $mform->setConstants(array($repeathiddenname => $repeats));
-        $namecloned = array();
-        for ($i = 0; $i < $repeats; $i++) {
-            foreach ($elementobjs as $elementobj) {
-                $elementclone = fullclone($elementobj);
-                $this->repeat_elements_fix_clone($i, $elementclone, $namecloned);
-
-                if ($elementclone instanceof HTML_QuickForm_group && !$elementclone->_appendName) {
-                    foreach ($elementclone->getElements() as $el) {
-                        $this->repeat_elements_fix_clone($i, $el, $namecloned);
-                    }
-                    $elementclone->setLabel(str_replace('{no}', $i + 1, $elementclone->getLabel()));
-                }
-
-                $mform->addElement($elementclone);
-            }
-        }
-        for ($i = 0; $i < $repeats; $i++) {
-            foreach ($options as $elementname => $elementoptions) {
-                $pos = strpos($elementname, '[');
-                if ($pos !== false) {
-                    $realelementname = substr($elementname, 0, $pos) . "[$i]";
-                    $realelementname .= substr($elementname, $pos);
-                } else {
-                    $realelementname = $elementname . "[$i]";
-                }
-                foreach ($elementoptions as $option => $params) {
-                    switch ($option) {
-                        case 'default':
-                            $mform->setDefault($realelementname, str_replace('{no}', $i + 1, $params));
-                            break;
-                        case 'helpbutton':
-                            $params = array_merge(array($realelementname), $params);
-                            call_user_func_array(array(&$mform, 'addHelpButton'), $params);
-                            break;
-                        case 'disabledif':
-                            foreach ($namecloned as $num => $name) {
-                                if ($params[0] == $name) {
-                                    $params[0] = $params[0] . "[$i]";
-                                    break;
-                                }
-                            }
-                            $params = array_merge(array($realelementname), $params);
-                            call_user_func_array(array(&$mform, 'disabledIf'), $params);
-                            break;
-                        case 'hideif':
-                            foreach ($namecloned as $num => $name) {
-                                if ($params[0] == $name) {
-                                    $params[0] = $params[0] . "[$i]";
-                                    break;
-                                }
-                            }
-                            $params = array_merge(array($realelementname), $params);
-                            call_user_func_array(array(&$mform, 'hideIf'), $params);
-                            break;
-                        case 'rule':
-                            if (is_string($params)) {
-                                $params = array(null, $params, null, 'client');
-                            }
-                            $params = array_merge(array($realelementname), $params);
-                            call_user_func_array(array(&$mform, 'addRule'), $params);
-                            break;
-
-                        case 'type':
-                            $mform->setType($realelementname, $params);
-                            break;
-
-                        case 'expanded':
-                            $mform->setExpanded($realelementname, $params);
-                            break;
-
-                        case 'advanced':
-                            $mform->setAdvanced($realelementname, $params);
-                            break;
-                    }
-                }
-            }
-        }
-        $mform->addElement('submit', $addfieldsname, $addstring);
-        if ($deletefieldsname) {
-            $mform->addElement('submit', $deletefieldsname, $deletestring);
-            $mform->registerNoSubmitButton($deletefieldsname);
-        }
-
-        if (!$addbuttoninside) {
-            $mform->closeHeaderBefore($addfieldsname);
-        }
-
-        return $repeats;
+    private function display_slide($slide) {
+        // Todo implement displau_slide method
     }
+
 }

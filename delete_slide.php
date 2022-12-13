@@ -15,18 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Script to Delete a slide
  *
  * @package   block_envf_slider
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version    = 2022121202;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires   = 2012112900;        // Requires this Moodle version.
-$plugin->release    = 1.0;
-$plugin->maturity   = MATURITY_ALPHA;
-$plugin->component  = 'block_envf_slider'; // Full name of the plugin (used for diagnostics).
-$plugin->dependencies = [];
+function delete_slide($slideid) {
+    // Todo implement delete_slide method.
+}
+$slideid = required_param('slideid', PARAM_INT);
+delete_slide($slideid);

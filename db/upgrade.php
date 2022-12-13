@@ -28,12 +28,12 @@
  * @param int $oldversion The version number of the plugin that was installed.
  * @return boolean
  */
-function xmldb_block_envf_slider_upgrade($oldversion) {
+function xmldb_block_envf_slider_upgrade($oldversion): bool {
     // Rss_thumbnails savepoint reached.
-    upgrade_block_savepoint(true, 2022111004, 'rss_thumbnails');
-
+    if ($oldversion < 2022121201) {
+        upgrade_block_savepoint(true, 2022121201, 'envf_slider');
+    }
     // Automatically generated Moodle v4.0.0 release upgrade line.
     // Put any upgrade step following this.
-
     return true;
 }

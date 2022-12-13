@@ -22,17 +22,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['contentnoconfig'] = 'Configure the block to see your thumbnail links & action.';
-$string['addmorethumbnails'] = 'Add {no} more thumbnails';
-$string['blockstring'] = 'Block string';
-$string['config:title'] = 'Title';
-$string['config:cta'] = 'CALL to Action';
-$string['config:ctatitle'] = 'CALL to Action Title';
-$string['config:thumbtitle'] = 'Thumbnail {no} Title';
-$string['config:thumbimage'] = 'Thumbnail {no} Image';
-$string['config:thumburl'] = 'Thumbnail {no} URL';
-$string['headerconfig'] = 'Config section header';
 $string['pluginname'] = 'ENVF Slider';
-$string['removelastthumb'] = 'Remove last thumbnail';
-$string['thumblinks_action:addinstance'] = 'Add a thumblinks_action block';
-$string['thumblinks_action:myaddinstance'] = 'Add a thumblinks_action block to my moodle';
+$string['config:addnewslide'] = 'Add a new slide';
+$string['config:slidetitle'] = 'Title of the slide';
+$string['config:slidedescription'] = 'Little text to add in the slide';
+$string['config:thumbimage'] = 'Image to display as the background of the slide';
+$string['config:deleteslidebtn'] = "Delete this slide";
