@@ -37,16 +37,16 @@
     }
 }}
 <div id="block-envf-slider-{{uniqid}}" class="block-envf-slider position-relative">
-    <div class="arrow-container position-absolute text-white d-flex align-items-center justify-content-between user-select-none">
-        <span id="arrow-left" class="arrow"><</span>
-        <span id="arrow-right" class="arrow">></span>
-    </div>
-    <div class="d-flex flex-column h-100">
-        <ul class="d-flex overflow-hidden flex-nowrap flex-row flex-grow-1">
-            {{#slides}}
-                {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
-            {{/slides}}
-        </ul>
+    <ul class="d-flex overflow-hidden flex-nowrap flex-row flex-grow-1">
+        {{#slides}}
+            {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
+        {{/slides}}
+    </ul>
+    <div class="global-interface-container position-absolute d-flex flex-column">
+        <div class="arrow-container flex-grow-1  text-white d-flex align-items-center justify-content-between user-select-none">
+            <span id="arrow-left" class="arrow"><</span>
+            <span id="arrow-right" class="arrow">></span>
+        </div>
         <ul class="slidefooter-container d-flex justify-content-center">
             {{#slides}}
                 {{< block_envf_slider/slidefooter }}{{/ block_envf_slider/slidefooter }}
