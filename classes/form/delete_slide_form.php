@@ -37,11 +37,13 @@ use moodleform;
  */
 class delete_slide_form extends moodleform {
 
-    /** @var int $slideid the id of the slide to delete */
+    /** @var int $slideid the id of the slide that will be deleted on submission of this form */
     private int $slideid;
 
     /**
-     * @inheritDoc
+     * Constructor of delete_slide_form
+     *
+     * @param int $slideid the id of the slide attached to this form (See {@see delete_slide_form::$slideid}).
      */
     public function __construct($slideid) {
         $this->slideid = $slideid;
@@ -56,6 +58,10 @@ class delete_slide_form extends moodleform {
         return new moodle_url("/blocks/envf_slider/delete_slide.php", $urlparams);
     }
 
+    /**
+     * Methods that defines the form.
+     * It defines the form's components and their format, etc...
+     */
     protected function definition() {
         parent::__construct(
             $this->get_action_url()

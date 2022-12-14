@@ -18,6 +18,6 @@
  * Settings for the envf_slider block
  *
  * @package    block_envf_slider
- * @copyright  2019 Mihail Geshoski <mihail@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

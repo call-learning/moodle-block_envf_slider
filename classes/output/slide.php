@@ -24,7 +24,10 @@
 
 namespace block_envf_slider\output;
 
+use block_envf_slider;
+use moodle_exception;
 use moodle_url;
+use ReflectionClass;
 use renderable;
 use renderer_base;
 use templatable;
@@ -39,45 +42,67 @@ use templatable;
 class slide implements renderable, templatable {
 
     /** @var int $id The id of the slide. */
-    private $id;
+    public $id;
 
     /** @var string $title The title of the slide. */
-    private $title;
+    public $title;
 
     /** @var string $description The description of the slide. */
-    private $description;
+    public $description;
 
-    /** @var moodleurl $imageurl The url of the background image of the slide. */
-    private $imageurl;
+    /** @var moodle_url $image The url of the background image of the slide. */
+    public $image;
 
     /** @var bool $whitetext A booleab telling whether the text has to be white. */
-    private $whitetext;
+    public $whitetext;
 
     /**
      * Constructor for a slide.
      *
-     * @param int $id
-     * @param string $title
-     * @param string $description
-     * @param moodle_url $imageurl
-     * @param bool $whitetext
+     * @param int $id The id of the slide.
+     * @param string $title The title of the slide.
+     * @param string $description The discription of the slide.
+     * @param moodle_url $image The image url of the slide.
+     * @param bool $whitetext whether the text has to be dsplayed in white or not.
      */
-    public function __construct($id, $title, $description, $imageurl, $whitetext=false) {
+    public function __construct($id, $title, $description, $image, $whitetext=false) {
         $this->id = $id;
         $this->title = $title;
         $this->description = $description;
-        $this->imageurl = $imageurl;
+        $this->image = $image;
         $this->whitetext = $whitetext;
     }
 
     /**
-     * @inheritDoc
+     * Creates a slide from an array of properties.
+     *
+     * @param array $array an array of slide properties.
+     * @return slide A slide create with the array's properties.
      */
-    public function export_for_template(renderer_base $output) {
+    public static function create_from_array($array): slide {
+        $classproperties = array_keys(get_class_vars(SLIDECLASSNAME));
+        if (count($array) !== count($classproperties)) {
+            throw new moodle_exception(
+                "Error creating a slide from an array, expected ".count($classproperties).
+                " values, got ".count($array)."."
+            );
+        }
+        $reflector = new ReflectionClass(SLIDECLASSNAME);
+        return $reflector->newInstanceArgs($array);
+    }
+
+    /**
+     * Method to export data that will be used to render the slide template.
+     *
+     * @param renderer_base $output the renderer.
+     * @return array
+     */
+    public function export_for_template(renderer_base $output): array {
         $data = [];
         foreach ($this as $attr => $value) {
             $data[$attr] = $value;
         }
         return $data;
     }
+
 }

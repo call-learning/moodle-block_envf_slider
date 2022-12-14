@@ -25,6 +25,7 @@
 use block_envf_slider\output\block;
 use block_envf_slider\output\slide;
 
+const SLIDECLASSNAME = "block_envf_slider\output\slide";
 /**
  * Class block_envf_slider
  *
@@ -34,6 +35,9 @@ use block_envf_slider\output\slide;
  */
 class block_envf_slider extends block_base {
 
+    /**
+     * Method to initialise block's values.
+     */
     public function init() {
         $this->title = get_string('pluginname', 'block_envf_slider');
 
@@ -54,30 +58,17 @@ class block_envf_slider extends block_base {
 
         $this->page->requires->css(
             new moodle_url('/blocks/envf_slider/js/glide/dist/css/glide.core' .
-                (debugging() ? '.min' : '') . '.css'));
+                (debugging() ? '.min' : '') . '.css')
+        );
 
         if (!$this->config_is_valid()) {
-            $this->content->text = get_string("invalidconfig", "block_rss_thumbnails");
+            $this->content->text = get_string("invalidconfig", "block_envf_slider");
             return $this->content;
         }
 
         $renderer = $this->page->get_renderer('core');
 
-        // Todo get a way to retrieve configured slides.
-        $slides = [
-            new slide(
-                0,
-                "My First Slide",
-                "Helloooo this is my first slide ever created!",
-                new moodle_url("https://cdn.pixabay.com/photo/2022/11/20/09/58/leaves-7603946_960_720.jpg"),
-            ),
-            new slide(
-                1,
-                "My Second Slide",
-                "Second here !!",
-                new moodle_url(""),
-            ),
-        ];
+        $slides = $this->get_configured_slides();
 
         $block = new block($slides);
 
@@ -86,13 +77,198 @@ class block_envf_slider extends block_base {
     }
 
     /**
-     * Checks wether the configuration of the block is valid or not.
+     * Checks if the block's configuration is valid.
      *
-     * @return bool true if the configuration of the block is valid, false if it's not.
+     * @return bool True if the block's configuration is valide, false if not.
      */
-    public function config_is_valid(): bool {
-        // TODO implement config_is_valid function.
+    protected function config_is_valid(): bool {
+        // Check if $this->config is an array or object.
+        if (!is_array($this->config) && !is_object($this->config)) {
+            return false;
+        }
+
+        if (empty($this->config)) {
+            return false;
+        }
+
+        // Use the get_class_vars() function to get the property names
+        // of the Slide class.
+        $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
+
+        // Check if all the property names have non-empty values.
+        $numproperties = count($this->config->{"slide_$propertynames[0]"});
+
+        foreach ($propertynames as $propertyname) {
+            $configkey = $this->get_config_property_name($propertyname);
+            if (empty($this->config->$configkey)) {
+                // Some config fields are missing.
+                return false;
+            }
+            if (count($this->config->$configkey) !== $numproperties) {
+                // Some slides are missing at least one config field.
+                return false;
+            }
+        }
         return true;
     }
 
+
+    /**
+     * Serialize and store config data
+     *
+     * @param stdClass $data
+     * @param false $nolongerused
+     * @throws coding_exception
+     */
+    public function instance_config_save($data, $nolongerused = false) {
+        $config = clone($data);
+        // Save the images.
+        if ($config->slide_title) {
+            foreach ($config->slide_image as $index => $images) {
+                file_save_draft_area_files($images,
+                    $this->context->id,
+                    'block_envf_slider',
+                    'images',
+                    $index,
+                    array('subdirs' => true));
+            }
+            // Here we make sure we copy the image id into the
+            // block parameter. This is then used in save_data
+            // to set up the block to the right image.
+            $fs = get_file_storage();
+            $files = $fs->get_area_files($this->context->id,
+                'block_envf_slider',
+                'images'
+            );
+            foreach ($files as $file) {
+                if (in_array($file->get_filename(), array('.', '..'))) {
+                    continue;
+                }
+                $config->slide_image[$file->get_itemid()] = $file->get_id();
+            }
+        }
+        parent::instance_config_save($config, $nolongerused);
+    }
+
+    /**
+     * Delete the block and images.
+     *
+     * @return bool
+     */
+    public function instance_delete() {
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->context->id, 'block_envf_slider');
+        return true;
+    }
+
+    /**
+     * Copy any block-specific data when copying to a new block instance.
+     *
+     * @param int $fromid the id number of the block instance to copy from
+     * @return boolean
+     */
+    public function instance_copy($fromid) {
+        global $DB;
+
+        $fromcontext = context_block::instance($fromid);
+        $blockinstance = $DB->get_record('block_instances', array('id' => $fromcontext->instanceid));
+        $block = block_instance($blockinstance->blockname, $blockinstance);
+        $numslides = empty($block->config->slide_title) ? 0 : count($block->config->slide_title);
+
+        $fs = get_file_storage();
+
+        // This extra check if file area is empty adds one query if it is not empty but saves several if it is.
+        if (!$fs->is_area_empty($fromcontext->id, 'block_envf_slider', 'images', 0, false)) {
+            for ($itemid = 0; $itemid < $numslides; $itemid++) {
+                $draftitemid = 0;
+                file_prepare_draft_area(
+                    $draftitemid,
+                    $fromcontext->id,
+                    'block_envf_slider',
+                    'images',
+                    $itemid,
+                    array('subdirs' => true));
+                file_save_draft_area_files(
+                    $draftitemid,
+                    $this->context->id,
+                    'block_envf_slider',
+                    'images', $itemid,
+                    array('subdirs' => true));
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Method that creates new {@see slide} objects from block's configuration and returns them into an array.
+     *
+     * @return array The array of already configured slides.
+     */
+    public function get_configured_slides(): array {
+        if (!$this->config_is_valid()) {
+            throw new moodle_exception("invalidconfig", "block_envf_slider");
+        }
+
+        $slides = [];
+        $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
+        $imageurls = $this->get_image_urls();
+        // Loop for each slide.
+        $maxindex = count($this->config->{$this->get_config_property_name($propertynames[0])});
+        for ($i = 0; $i < $maxindex; $i++) {
+            $array = [];
+            foreach ($propertynames as $propertyname) {
+                $array[$propertyname] = $this->config->{$this->get_config_property_name($propertyname)}[$i];
+            }
+            $array["image"] = $imageurls[$i];
+            $slide = slide::create_from_array($array);
+            $slides[] = $slide;
+        }
+        return $slides;
+    }
+
+    /**
+     * Gets the name of a {@see slide} property as used in the block configuration.
+     *
+     * @param $propertyname the {@see slide}'s name property.
+     * @return string The configuration property associated.
+     */
+    private function get_config_property_name($propertyname): string {
+        return "slide_$propertyname";
+    }
+
+    /**
+     * @return int|null
+     */
+    private function get_number_of_items() {
+        return count($this->config->slide_id);
+    }
+
+    /**
+     * A method to get all the image urls from their image ids.
+     *
+     * @param $itemids
+     * @return array An array of all the images moodle urls.
+     */
+    public function get_image_urls(): array {
+        $imageurls = [];
+        $fs = get_file_storage();
+        for ($i = 0; $i < $this->get_number_of_items(); $i++) {
+            $allfiles = $fs->get_area_files($this->context->id, 'block_envf_slider', 'images', $i);
+            foreach ($allfiles as $file) {
+                if ($file->is_valid_image()) {
+                    $imageurl = moodle_url::make_pluginfile_url(
+                        $this->context->id,
+                        'block_envf_slider',
+                        'images',
+                        $i,
+                        $file->get_filepath(),
+                        $file->get_filename()
+                    )->out(false);
+                    $imageurls[] = $imageurl;
+                    break;
+                }
+            }
+        }
+        return $imageurls;
+    }
 }
