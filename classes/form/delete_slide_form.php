@@ -23,11 +23,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_envf_slider;
+namespace block_envf_slider\form;
 
 use moodle_url;
 use moodleform;
-use MoodleQuickForm;
 
 /**
  * Class delete_slide_form

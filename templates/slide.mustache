@@ -30,12 +30,17 @@
 
     Example context (json):
     {
+    "id": 0,
+    "title": "Title example",
+    "description": "Description example",
     "imageurl": "https://example.com"
     }
 
 }}
-<li class="glide__slide">
-    <span class="arrow-left"><</span>
-    <span class="arrow-right">></span>
-    <img src="{{imageurl}}" alt="Item image"/>
+<li id="block-envf-slider-slide-{{id}}" class="glide__slide list-unstyled">
+    <img src="{{imageurl}}" alt="" class="bg-img position-absolute"/>
+    <div class="text-container{{#whitetext}} text-white{{/whitetext}}" >
+        <h3 class="title">{{title}}</h3>
+        <p class="description">{{description}}</p>
+    </div>
 </li>

@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use block_envf_slider\delete_slide_form;
+use block_envf_slider\form\delete_slide_form;
 
 /**
  * Class block_envf_slider_edit_form
@@ -114,7 +114,7 @@ class block_envf_slider_edit_form extends block_edit_form {
         $slide->removebtn = $this->mform->addElement(
             'submit',
             'remove_slide',
-            get_string('config:removeslide')
+            get_string('config:deleteslide')
         );
 
         return $slide;

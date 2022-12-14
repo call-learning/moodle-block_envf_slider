@@ -24,6 +24,7 @@
 
 namespace block_envf_slider\output;
 
+use moodle_url;
 use renderable;
 use renderer_base;
 use templatable;
@@ -49,30 +50,34 @@ class slide implements renderable, templatable {
     /** @var moodleurl $imageurl The url of the background image of the slide. */
     private $imageurl;
 
+    /** @var bool $whitetext A booleab telling whether the text has to be white. */
+    private $whitetext;
+
     /**
      * Constructor for a slide.
      *
-     * @param $id
-     * @param $title
-     * @param $description
-     * @param $imageurl
+     * @param int $id
+     * @param string $title
+     * @param string $description
+     * @param moodle_url $imageurl
+     * @param bool $whitetext
      */
-    public function __construct($id, $title, $description, $imageurl) {
+    public function __construct($id, $title, $description, $imageurl, $whitetext=false) {
         $this->id = $id;
         $this->title = $title;
         $this->description = $description;
         $this->imageurl = $imageurl;
+        $this->whitetext = $whitetext;
     }
 
     /**
      * @inheritDoc
      */
     public function export_for_template(renderer_base $output) {
-        return [
-            "id" => $this->id,
-            "title" => $this->title,
-            "description" => $this->description,
-            "imageurl" => $this->imageurl
-        ];
+        $data = [];
+        foreach ($this as $attr => $value) {
+            $data[$attr] = $value;
+        }
+        return $data;
     }
 }
