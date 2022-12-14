@@ -50,33 +50,43 @@
         ]
     }
 }}
-<div id="block-envf-slider-{{uniqid}}" class="block-envf-slider position-relative">
-    <ul class="d-flex overflow-hidden flex-nowrap flex-row flex-grow-1">
-        {{#slides}}
-            <li class="glide__slide list-unstyled">
-                {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
-            </li>
-        {{/slides}}
-    </ul>
+<div id="block-envf-slider-{{uniqid}}" class="glide block-envf-slider position-relative">
+    <div data-glide-el="track" class="glide__track">
+        <ul class="d-flex overflow-hidden flex-nowrap flex-row flex-grow-1 glide__slides">
+            {{#slides}}
+                <li class="glide__slide list-unstyled">
+                    {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
+                </li>
+            {{/slides}}
+        </ul>
+    </div>
     <div class="global-interface-container position-absolute d-flex flex-column">
         <div class="arrow-container flex-grow-1  text-white d-flex align-items-center justify-content-between user-select-none">
             <span id="arrow-left" class="arrow">&lt;</span>
             <span id="arrow-right" class="arrow">&gt;</span>
         </div>
-        <ul class="slidefooter-container d-flex justify-content-center">
-            {{#slides}}
-                <li class="slidefooter-item list-unstyled m-2"></li>
-            {{/slides}}
-        </ul>
+        <!--
+        Removed because i think that glide already implemented a footer.
+        <div class="glide">
+            <div data-glide-el="track" class="glide__track">
+                <ul class="slidefooter-container d-flex justify-content-center">
+                    {{#slides}}
+                        <li class="glide__slide slidefooter-item list-unstyled m-2"></li>
+                    {{/slides}}
+                </ul>
+            </div>
+        </div>
+        -->
     </div>
 {{#js}}
     require(['block_slider/glide'], function(glide) {
         glide('#envf-slider-{{uniqid}} .glide', {
                 type: 'carousel',
+                focusAt: 'center',
                 startAt: 0,
-                perView: 4,
+                perView: 1,
                 gap: 0,
-                autoplay: 0
+                autoplay: 5000
             }
         );
     });
