@@ -41,16 +41,21 @@ class block implements renderable, templatable {
     private $slides;
 
     /**
-     * @param $slides array An array of {@see slide} that the block contains.
+     * Constructor for {@see block}.
+     *
+     * @param array $slides An array of {@see slide} that the block contains.
      */
     public function __construct($slides) {
         $this->slides = $slides;
     }
 
     /**
-     * @inheritDoc
+     * Method to export data that will be used to render the block template.
+     *
+     * @param renderer_base $output the renderer.
+     * @return array
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(renderer_base $output): array {
         $slides = [];
         foreach ($this->slides as $slide) {
             $slides[] = $slide->export_for_template($output);

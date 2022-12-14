@@ -71,9 +71,12 @@ class slide implements renderable, templatable {
     }
 
     /**
-     * @inheritDoc
+     * Method to export data that will be used to render the slide template.
+     *
+     * @param renderer_base $output the renderer.
+     * @return array
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(renderer_base $output): array {
         $data = [];
         foreach ($this as $attr => $value) {
             $data[$attr] = $value;

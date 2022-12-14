@@ -15,9 +15,9 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_slider/block
+    @template block_envf_slider/slide
 
-    Template which defines an RSS Feeds block
+    Template which defines a slide into an envf_slider block
 
     Classes required for JS:
     * none
@@ -27,20 +27,25 @@
 
     Context variables required for this template:
     * feeds - array: An array of RSS feeds.
+    * id - int: The id of the slide.
+    * title - string: The title of the slide.
+    * description - string: The description of the slide.
+    * imageurl - string: The url for the background image of the slide.
 
     Example context (json):
     {
-    "id": 0,
-    "title": "Title example",
-    "description": "Description example",
-    "imageurl": "https://example.com"
+        "id": 0,
+        "title": "Title example",
+        "description": "Description example",
+        "imageurl": "https://example.com",
+        "whitetext":"true"
     }
 
 }}
-<li id="block-envf-slider-slide-{{id}}" class="glide__slide list-unstyled">
+<div id="block-envf-slider-slide-{{id}}">
     <img src="{{imageurl}}" alt="" class="bg-img position-absolute"/>
     <div class="text-container{{#whitetext}} text-white{{/whitetext}}" >
         <h3 class="title">{{title}}</h3>
         <p class="description">{{description}}</p>
     </div>
-</li>
+</div>

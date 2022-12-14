@@ -35,7 +35,7 @@ use block_envf_slider\form\delete_slide_form;
 class block_envf_slider_edit_form extends block_edit_form {
 
     /**
-     * @var moodleform $mform the formulary object passed in {@see block_envf_slider_edit_form::specific_definition()}
+     * @var MoodleQuickForm $mform the formulary object passed in {@see block_envf_slider_edit_form::specific_definition()}
      * to be able to get it int the method {@see block_envf_slider_edit_form::add_slide()}
      */
     private $mform;
@@ -43,7 +43,7 @@ class block_envf_slider_edit_form extends block_edit_form {
     /**
      * Form definition
      *
-     * @param $mform
+     * @param MoodleQuickForm $mform The formulary used.
      * @throws coding_exception
      */
     protected function specific_definition($mform) {
@@ -175,7 +175,7 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @return void
      */
     private function display_slide($slide) {
-        // Todo implement displau_slide method
+        // Todo implement displau_slide method.
     }
 
 }

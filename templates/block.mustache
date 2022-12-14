@@ -15,9 +15,9 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_slider/block
+    @template block_envf_slider/block
 
-    Template which defines an RSS Feeds block
+    Template which defines an envf slider block
 
     Classes required for JS:
     * none
@@ -26,30 +26,46 @@
     * none
 
     Context variables required for this template:
-    * feeds - array: An array of RSS feeds.
+    * slides - array: An array of slides.
 
     Example context (json):
     {
-        "items":
+        "uniqid": 0,
+        "slides":
         [
-            "imageurl": "https://example.com"
+            {
+                "id": 0,
+                "imageurl": "https://example.com",
+                "title": "A title",
+                "description": "A description",
+                "whitetext": "true"
+            },
+            {
+                "id": 1,
+                "imageurl": "https://example.com",
+                "title": "A title",
+                "description": "A description",
+                "whitetext": "true"
+            }
         ]
     }
 }}
 <div id="block-envf-slider-{{uniqid}}" class="block-envf-slider position-relative">
     <ul class="d-flex overflow-hidden flex-nowrap flex-row flex-grow-1">
         {{#slides}}
-            {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
+            <li class="glide__slide list-unstyled">
+                {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
+            </li>
         {{/slides}}
     </ul>
     <div class="global-interface-container position-absolute d-flex flex-column">
         <div class="arrow-container flex-grow-1  text-white d-flex align-items-center justify-content-between user-select-none">
-            <span id="arrow-left" class="arrow"><</span>
-            <span id="arrow-right" class="arrow">></span>
+            <span id="arrow-left" class="arrow">&lt;</span>
+            <span id="arrow-right" class="arrow">&gt;</span>
         </div>
         <ul class="slidefooter-container d-flex justify-content-center">
             {{#slides}}
-                {{< block_envf_slider/slidefooter }}{{/ block_envf_slider/slidefooter }}
+                <li class="slidefooter-item list-unstyled m-2"></li>
             {{/slides}}
         </ul>
     </div>

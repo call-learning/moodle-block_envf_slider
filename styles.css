@@ -12,6 +12,7 @@
 .block-envf-slider .arrow {
     font-size: 4rem;
     text-shadow: 0 0 10px #444;
+    opacity: 0.5;
 }
 
 .block-envf-slider {
@@ -35,7 +36,7 @@
 }
 
 .block-envf-slider .slidefooter-item:hover {
-    background-color: #0a4b84;
+    background-color: #aa1111;
 }
 
 .block-envf-slider .text-container {

@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * Function deleting the slide with the given id.
  * Need to see if it has to rearrange other slides ids in order to avoid bugs.
  *
- * @param $slideid
+ * @param int $slideid the id of the slide that has to be deleted.
  * @return void
  */
 function delete_slide($slideid) {

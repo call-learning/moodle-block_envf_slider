@@ -34,6 +34,9 @@ use block_envf_slider\output\slide;
  */
 class block_envf_slider extends block_base {
 
+    /**
+     * Method to initialise block's values.
+     */
     public function init() {
         $this->title = get_string('pluginname', 'block_envf_slider');
 
