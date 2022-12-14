@@ -65,7 +65,18 @@ class block_envf_slider extends block_base {
 
         // Todo get a way to retrieve configured slides.
         $slides = [
-            new slide(0, "My First Slide", "Helloooo this is my first slide ever created!", new moodle_url(""))
+            new slide(
+                0,
+                "My First Slide",
+                "Helloooo this is my first slide ever created!",
+                new moodle_url(""),
+            ),
+            new slide(
+                1,
+                "My Second Slide",
+                "Second here !!",
+                new moodle_url(""),
+            ),
         ];
 
         $block = new block($slides);
