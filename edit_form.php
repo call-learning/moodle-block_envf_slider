@@ -35,10 +35,10 @@ use block_envf_slider\delete_slide_form;
 class block_envf_slider_edit_form extends block_edit_form {
 
     /**
-     * @var MoodleQuickForm $mform the formulary object passed in {@see block_envf_slider_edit_form::specific_definition()}
+     * @var moodleform $mform the formulary object passed in {@see block_envf_slider_edit_form::specific_definition()}
      * to be able to get it int the method {@see block_envf_slider_edit_form::add_slide()}
      */
-    private MoodleQuickForm $mform;
+    private $mform;
 
     /**
      * Form definition
@@ -48,7 +48,6 @@ class block_envf_slider_edit_form extends block_edit_form {
      */
     protected function specific_definition($mform) {
         $this->mform = $mform;
-        $this->amd_requires();
 
         // Gets all the slides previously added.
         $slides = $this->get_current_slides();
@@ -117,16 +116,8 @@ class block_envf_slider_edit_form extends block_edit_form {
             'remove_slide',
             get_string('config:removeslide')
         );
-        return $slide;
-    }
 
-    /**
-     * Calls all the amd fuctions we need.
-     *
-     * @return void
-     */
-    private function amd_requires() {
-        $this->page->requires->js_call_amd('block_envf_slider/editform', 'calladdnewslide');
+        return $slide;
     }
 
     /**

@@ -21,6 +21,7 @@
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace block_envf_slider\output;
 
 use plugin_renderer_base;

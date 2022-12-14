@@ -38,14 +38,14 @@
 }}
 <div id="block-envf-slider-{{uniqid}}" class="block-slider">
     <ul class="container-fluid">
-        {{#slide}}
+        {{#slides}}
             {{< block_envf_slider/slide }}{{/block_envf_slider/slide}}
-        {{/slide}}
+        {{/slides}}
     </ul>
     <ul>
-        {{#slide}}
+        {{#slides}}
             {{< block_envf_slider/slidefooter}}{{/block_envf_slider/slidefooter}}
-        {{/slide}}
+        {{/slides}}
     </ul>
 {{#js}}
     require(['block_slider/glide'], function(glide) {
@@ -54,7 +54,7 @@
                 startAt: 0,
                 perView: 4,
                 gap: 0,
-                autoplay: {{ carousseldelay }}
+                autoplay: 0
             }
         );
     });

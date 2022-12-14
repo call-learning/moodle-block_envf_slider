@@ -26,6 +26,7 @@
 namespace block_envf_slider;
 
 use moodle_url;
+use moodleform;
 use MoodleQuickForm;
 
 /**
@@ -35,7 +36,7 @@ use MoodleQuickForm;
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class delete_slide_form extends MoodleQuickForm {
+class delete_slide_form extends moodleform {
 
     /** @var int $slideid the id of the slide to delete */
     private int $slideid;
@@ -45,16 +46,6 @@ class delete_slide_form extends MoodleQuickForm {
      */
     public function __construct($slideid) {
         $this->slideid = $slideid;
-        parent::__construct(
-            'deleteslideform',
-            'POST',
-            $this->get_action_url()
-        );
-        $this->addElement(
-            'submit',
-            'deleteslidebtn',
-            get_string('config:deleteslidebtn')
-        );
     }
 
     /**
@@ -64,5 +55,16 @@ class delete_slide_form extends MoodleQuickForm {
     private function get_action_url(): moodle_url {
         $urlparams = ["slideid" => $this->slideid];
         return new moodle_url("/blocks/envf_slider/delete_slide.php", $urlparams);
+    }
+
+    protected function definition() {
+        parent::__construct(
+            $this->get_action_url()
+        );
+        $this->_form->addElement(
+            'submit',
+            'deleteslidebtn',
+            get_string('config:deleteslidebtn')
+        );
     }
 }

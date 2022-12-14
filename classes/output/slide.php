@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class block_envf_slider\output\block
+ * Contains class block_envf_slider\output\slide
  *
  * @package   block_envf_slider
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
@@ -29,34 +29,50 @@ use renderer_base;
 use templatable;
 
 /**
- * Class to represent a ENVF slider block.
+ * Class to represent a slide in the envf slider block.
  *
  * @package   block_envf_slider
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block implements renderable, templatable {
+class slide implements renderable, templatable {
 
-    /** @var array $slides An array of {@see slide} representing the slides the block contains. */
-    private $slides;
+    /** @var int $id The id of the slide. */
+    private $id;
+
+    /** @var string $title The title of the slide. */
+    private $title;
+
+    /** @var string $description The description of the slide. */
+    private $description;
+
+    /** @var moodleurl $imageurl The url of the background image of the slide. */
+    private $imageurl;
 
     /**
-     * @param $slides array An array of {@see slide} that the block contains.
+     * Constructor for a slide.
+     *
+     * @param $id
+     * @param $title
+     * @param $description
+     * @param $imageurl
      */
-    public function __construct($slides) {
-        $this->slides = $slides;
+    public function __construct($id, $title, $description, $imageurl) {
+        $this->id = $id;
+        $this->title = $title;
+        $this->description = $description;
+        $this->imageurl = $imageurl;
     }
 
     /**
      * @inheritDoc
      */
     public function export_for_template(renderer_base $output) {
-        $slides = [];
-        foreach ($this->slides as $slide) {
-            $slides[] = $slide->exportfortemplate();
-        }
         return [
-            "slides" => $slides
+            "id" => $this->id,
+            "title" => $this->title,
+            "description" => $this->description,
+            "imageurl" => $this->imageurl
         ];
     }
 }
