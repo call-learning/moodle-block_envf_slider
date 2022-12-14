@@ -53,7 +53,7 @@ class block implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $slides = [];
         foreach ($this->slides as $slide) {
-            $slides[] = $slide->exportfortemplate();
+            $slides[] = $slide->export_for_template($output);
         }
         return [
             "slides" => $slides

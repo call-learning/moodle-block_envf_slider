@@ -23,6 +23,7 @@
  */
 
 use block_envf_slider\output\block;
+use block_envf_slider\output\slide;
 
 /**
  * Class block_envf_slider
@@ -45,7 +46,7 @@ class block_envf_slider extends block_base {
     /**
      * Creates and returns all the content of the block.
      */
-    public function get_content(): stdObject {
+    public function get_content() {
 
         if ($this->content != null && !empty($this->content->text)) {
             return $this->content;
@@ -60,8 +61,14 @@ class block_envf_slider extends block_base {
             return $this->content;
         }
 
-        $renderer = $this->page->get_renderer('block_envf_slider');
-        $block = new block();
+        $renderer = $this->page->get_renderer('core');
+
+        // Todo get a way to retrieve configured slides.
+        $slides = [
+            new slide(0, "My First Slide", "Helloooo this is my first slide ever created!", new moodle_url(""))
+        ];
+
+        $block = new block($slides);
 
         $this->content->text = $renderer->render($block);
         return $this->content;
