@@ -6,7 +6,7 @@
 }
 
 .block-envf-slider .arrow:hover {
-    color: #0a4b84;
+    color: #aa1111;
 }
 
 .block-envf-slider .arrow {
@@ -17,6 +17,7 @@
 .block-envf-slider {
     width: 100%;
     height: 60vh;
+    z-index: 10;
 }
 
 .block-envf-slider .bg-img {
@@ -24,6 +25,7 @@
     left: 0;
     width: 100%;
     height: 100%;
+    z-index: -1;
 }
 
 .block-envf-slider .slidefooter-item {
