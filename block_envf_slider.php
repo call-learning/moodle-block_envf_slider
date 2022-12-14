@@ -78,7 +78,7 @@ class block_envf_slider extends block_base {
                 1,
                 "My Second Slide",
                 "Second here !!",
-                new moodle_url(""),
+                new moodle_url("https://cdn.pixabay.com/photo/2022/11/20/09/58/leaves-7603946_960_720.jpg"),
             ),
         ];
 

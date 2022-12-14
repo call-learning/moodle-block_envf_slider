@@ -1,5 +1,5 @@
 /**
- * RSS Thumbnails block
+ * ENVF slider block
  *
  * @package
  * @copyright 2020 - CALL Learning - Laurent David <laurent@call-learning>
@@ -10,7 +10,28 @@ define(['jquery', 'block_envf_slider/config'], function($) {
         require(['glide'], function(Glide) {
             // Show the slider now we are initialised.
             $(locator).removeClass('d-none');
-            new Glide(locator, config).mount();
+            let glide = new Glide(locator, config);
+            glide.mount();
+
+            let forward = document.querySelector('#arrow-right');
+            let backward = document.querySelector('#arrow-left');
+
+            forward.addEventListener('click', function () {
+                glide.go('>');
+            });
+            backward.addEventListener('click', function () {
+                glide.go('<');
+            });
+
+            let footeritems = document.getElementsByClassName('slidefooter-item');
+
+            for(let i = 0; i < footeritems.length; i++){
+                var footeritem = footeritems[i];
+                footeritem.addEventListener('click', function () {
+                    glide.go('=' + i.toString());
+                });
+            }
         });
     };
 });
+
