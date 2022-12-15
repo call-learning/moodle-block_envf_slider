@@ -28,3 +28,5 @@ $string['config:slidetitle'] = 'Title of the slide';
 $string['config:slidedescription'] = 'Little text to add in the slide';
 $string['config:thumbimage'] = 'Image to display as the background of the slide';
 $string['config:deleteslidebtn'] = "Delete this slide";
+$string['envf_slider:addinstance'] = 'Add a new ENVF Slider block';
+$string['envf_slider:myaddinstance'] = 'Add a new ENVF Slider block to Dashboard';
