@@ -98,4 +98,89 @@ class block_envf_slider extends block_base {
         return true;
     }
 
+    /**
+     * Serialize and store config data
+     *
+     * @param stdClass $data
+     * @param false $nolongerused
+     * @throws coding_exception
+     */
+    public function instance_config_save($data, $nolongerused = false) {
+        $config = clone($data);
+        // Save the images.
+        if ($config->slide_title) {
+            foreach ($config->slide_image as $index => $images) {
+                file_save_draft_area_files($images,
+                    $this->context->id,
+                    'block_envf_slider',
+                    'images',
+                    $index,
+                    array('subdirs' => true));
+            }
+            // Here we make sure we copy the image id into the
+            // block parameter. This is then used in save_data
+            // to setup the block to the right image.
+            $fs = get_file_storage();
+            $files = $fs->get_area_files($this->context->id,
+                'block_envf_slider',
+                'images'
+            );
+            foreach ($files as $file) {
+                if (in_array($file->get_filename(), array('.', '..'))) {
+                    continue;
+                }
+                $config->slide_image[$file->get_itemid()] = $file->get_id();
+            }
+        }
+        parent::instance_config_save($config, $nolongerused);
+    }
+
+    /**
+     * Delete the block and images.
+     *
+     * @return bool
+     */
+    public function instance_delete() {
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->context->id, 'block_envf_slider');
+        return true;
+    }
+
+    /**
+     * Copy any block-specific data when copying to a new block instance.
+     *
+     * @param int $fromid the id number of the block instance to copy from
+     * @return boolean
+     */
+    public function instance_copy($fromid) {
+        global $DB;
+
+        $fromcontext = context_block::instance($fromid);
+        $blockinstance = $DB->get_record('block_instances', array('id' => $fromcontext->instanceid));
+        $block = block_instance($blockinstance->blockname, $blockinstance);
+        $numslides = empty($block->config->slide_title) ? 0 : count($block->config->slide_title);
+
+        $fs = get_file_storage();
+
+        // This extra check if file area is empty adds one query if it is not empty but saves several if it is.
+        if (!$fs->is_area_empty($fromcontext->id, 'block_envf_slider', 'images', 0, false)) {
+            for ($itemid = 0; $itemid < $numslides; $itemid++) {
+                $draftitemid = 0;
+                file_prepare_draft_area(
+                    $draftitemid,
+                    $fromcontext->id,
+                    'block_envf_slider',
+                    'images',
+                    $itemid,
+                    array('subdirs' => true));
+                file_save_draft_area_files(
+                    $draftitemid,
+                    $this->context->id,
+                    'block_envf_slider',
+                    'images', $itemid,
+                    array('subdirs' => true));
+            }
+        }
+        return true;
+    }
 }
