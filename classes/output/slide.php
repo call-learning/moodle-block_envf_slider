@@ -24,6 +24,7 @@
 
 namespace block_envf_slider\output;
 
+use moodle_exception;
 use moodle_url;
 use renderable;
 use renderer_base;
@@ -39,19 +40,19 @@ use templatable;
 class slide implements renderable, templatable {
 
     /** @var int $id The id of the slide. */
-    private $id;
+    public $id;
 
     /** @var string $title The title of the slide. */
-    private $title;
+    public $title;
 
     /** @var string $description The description of the slide. */
-    private $description;
+    public $description;
 
-    /** @var moodleurl $imageurl The url of the background image of the slide. */
-    private $imageurl;
+    /** @var moodleurl $image The url of the background image of the slide. */
+    public $image;
 
     /** @var bool $whitetext A booleab telling whether the text has to be white. */
-    private $whitetext;
+    public $whitetext;
 
     /**
      * Constructor for a slide.
@@ -62,12 +63,28 @@ class slide implements renderable, templatable {
      * @param moodle_url $imageurl
      * @param bool $whitetext
      */
-    public function __construct($id, $title, $description, $imageurl, $whitetext=false) {
+    public function __construct($id, $title, $description, $image, $whitetext=false) {
         $this->id = $id;
         $this->title = $title;
         $this->description = $description;
-        $this->imageurl = $imageurl;
+        $this->image = $image;
         $this->whitetext = $whitetext;
+    }
+
+    /**
+     * Creates a slide from an array of properties.
+     *
+     * @param $array
+     * @return slide
+     */
+    public static function create_from_array($array): slide {
+        if (count($array) == count(get_class_vars('slide'))) {
+            throw new moodle_exception(
+                "Error creating a slide from an array, expected ".count(get_class_vars('slide')).
+                " values, got ".count($array)."."
+            );
+        }
+        return new self(...$array);
     }
 
     /**

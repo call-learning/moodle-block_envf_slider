@@ -31,3 +31,4 @@ $string['config:deleteslide'] = "Delete this slide";
 $string['config:addmoreslides'] = "Add more slides";
 $string['envf_slider:addinstance'] = 'Add a new ENVF Slider block';
 $string['envf_slider:myaddinstance'] = 'Add a new ENVF Slider block to Dashboard';
+$string['invalidconfig'] = "It looks like your block configuration is invalid.<br>Make sure you did not lay some empty fields.";

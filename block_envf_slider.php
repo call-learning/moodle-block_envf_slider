@@ -25,6 +25,7 @@
 use block_envf_slider\output\block;
 use block_envf_slider\output\slide;
 
+const SLIDECLASSNAME = "block_envf_slider\output\slide";
 /**
  * Class block_envf_slider
  *
@@ -57,30 +58,17 @@ class block_envf_slider extends block_base {
 
         $this->page->requires->css(
             new moodle_url('/blocks/envf_slider/js/glide/dist/css/glide.core' .
-                (debugging() ? '.min' : '') . '.css'));
+                (debugging() ? '.min' : '') . '.css')
+        );
 
         if (!$this->config_is_valid()) {
-            $this->content->text = get_string("invalidconfig", "block_rss_thumbnails");
+            $this->content->text = get_string("invalidconfig", "block_envf_slider");
             return $this->content;
         }
 
         $renderer = $this->page->get_renderer('core');
 
-        // Todo get a way to retrieve configured slides.
-        $slides = [
-            new slide(
-                0,
-                "My First Slide",
-                "Helloooo this is my first slide ever created!",
-                new moodle_url("https://cdn.pixabay.com/photo/2022/11/20/09/58/leaves-7603946_960_720.jpg"),
-            ),
-            new slide(
-                1,
-                "My Second Slide",
-                "Second here !!",
-                new moodle_url("https://cdn.pixabay.com/photo/2022/11/20/09/58/leaves-7603946_960_720.jpg"),
-            ),
-        ];
+        $slides = $this->get_configured_slides();
 
         $block = new block($slides);
 
@@ -89,14 +77,41 @@ class block_envf_slider extends block_base {
     }
 
     /**
-     * Checks wether the configuration of the block is valid or not.
+     * Checks if the block's configuration is valid.
      *
-     * @return bool true if the configuration of the block is valid, false if it's not.
+     * @return bool True if the block's configuration is valide, false if not.
      */
-    public function config_is_valid(): bool {
-        // TODO implement config_is_valid function.
+    protected function config_is_valid(): bool {
+        // Check if $this->config is an array or object.
+        if (!is_array($this->config) && !is_object($this->config)) {
+            return false;
+        }
+
+        if (empty($this->config)) {
+            return false;
+        }
+
+        // Use the get_class_vars() function to get the property names
+        // of the Slide class.
+        $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
+
+        // Check if all the property names have non-empty values.
+        $numproperties = count($this->config->{"slide_$propertynames[0]"});
+
+        foreach ($propertynames as $propertyname) {
+            $configkey = $this->get_config_property_name($propertyname);
+            if (empty($this->config->$configkey)) {
+                // Some config fields are missing.
+                return false;
+            }
+            if (count($this->config->$configkey) !== $numproperties) {
+                // Some slides are missing at least one config field.
+                return false;
+            }
+        }
         return true;
     }
+
 
     /**
      * Serialize and store config data
@@ -119,7 +134,7 @@ class block_envf_slider extends block_base {
             }
             // Here we make sure we copy the image id into the
             // block parameter. This is then used in save_data
-            // to setup the block to the right image.
+            // to set up the block to the right image.
             $fs = get_file_storage();
             $files = $fs->get_area_files($this->context->id,
                 'block_envf_slider',
@@ -182,5 +197,40 @@ class block_envf_slider extends block_base {
             }
         }
         return true;
+    }
+
+    /**
+     * Method that creates new {@see slide} objects from block's configuration and returns them into an array.
+     *
+     * @return array The array of already configured slides.
+     */
+    public function get_configured_slides(): array {
+        if (!$this->config_is_valid()) {
+            throw new moodle_exception("invalidconfig", "block_envf_slider");
+        }
+
+        $slides = [];
+        $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
+
+        // Loop for each slide.
+        for ($i = 0; $i < count($this->config->{$this->get_config_property_name($propertynames[0])}); $i++) {
+            $array = [];
+            foreach ($propertynames as $propertyname) {
+                $array[$propertyname] = $this->config->{$this->get_config_property_name($propertyname)}[$i];
+            }
+            $slide = slide::create_from_array($array);
+            $slides[] = $slide;
+        }
+        return $slides;
+    }
+
+    /**
+     * Gets the name of a {@see slide} property as used in the block configuration.
+     *
+     * @param $propertyname the {@see slide}'s name property.
+     * @return string The configuration property associated.
+     */
+    private function get_config_property_name($propertyname): string {
+        return "slide_$propertyname";
     }
 }

@@ -172,7 +172,6 @@ class block_envf_slider_edit_form extends block_edit_form {
     /**
      * A method that add slide elements to the form.
      *
-     * @param stdClass $slide a slide under the form given by {@see block_envf_slider_edit_form::get_current_slides()}:
      * <pre>
      * "slide": {
      *      "id": 0,
@@ -183,10 +182,17 @@ class block_envf_slider_edit_form extends block_edit_form {
      * </pre>
      * @return void
      */
-    private function add_slides_elements($slide) {
+    private function add_slides_elements() {
         $mform = $this->mform;
         $repeatarray = array();
         $repeatedoptions = array();
+
+        $repeatarray[] = $mform->createElement(
+            'hidden',
+            'config_slide_id',
+            $this->get_current_repeats()
+        );
+        $repeatedoptions['config_slide_id']['type'] = PARAM_INT;
 
         $repeatarray[] = $mform->createElement('text', 'config_slide_title',
             get_string('config:slidetitle', 'block_envf_slider'));
@@ -195,6 +201,16 @@ class block_envf_slider_edit_form extends block_edit_form {
         $repeatarray[] = $mform->createElement('text', 'config_slide_description',
             get_string('config:slidedescription', 'block_envf_slider'));
         $repeatedoptions['config_slide_description']['type'] = PARAM_TEXT;
+
+        $repeatarray[] = $mform->createElement(
+            'advcheckbox',
+            'config_slide_whitetext',
+            get_string('whitetext', 'block_envf_slider'),
+            '',
+            null,
+            [false, true]
+        );
+        $repeatedoptions['config_slide_whitetext']['type'] = PARAM_BOOL;
 
         $repeatarray[] = $mform->createElement(
             'filemanager',
