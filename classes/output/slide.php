@@ -24,8 +24,10 @@
 
 namespace block_envf_slider\output;
 
+use block_envf_slider;
 use moodle_exception;
 use moodle_url;
+use ReflectionClass;
 use renderable;
 use renderer_base;
 use templatable;
@@ -48,7 +50,7 @@ class slide implements renderable, templatable {
     /** @var string $description The description of the slide. */
     public $description;
 
-    /** @var moodleurl $image The url of the background image of the slide. */
+    /** @var moodle_url $image The url of the background image of the slide. */
     public $image;
 
     /** @var bool $whitetext A booleab telling whether the text has to be white. */
@@ -57,11 +59,11 @@ class slide implements renderable, templatable {
     /**
      * Constructor for a slide.
      *
-     * @param int $id
-     * @param string $title
-     * @param string $description
-     * @param moodle_url $imageurl
-     * @param bool $whitetext
+     * @param int $id The id of the slide.
+     * @param string $title The title of the slide.
+     * @param string $description The discription of the slide.
+     * @param moodle_url $image The image url of the slide.
+     * @param bool $whitetext whether the text has to be dsplayed in white or not.
      */
     public function __construct($id, $title, $description, $image, $whitetext=false) {
         $this->id = $id;
@@ -74,17 +76,19 @@ class slide implements renderable, templatable {
     /**
      * Creates a slide from an array of properties.
      *
-     * @param $array
-     * @return slide
+     * @param array $array an array of slide properties.
+     * @return slide A slide create with the array's properties.
      */
     public static function create_from_array($array): slide {
-        if (count($array) == count(get_class_vars('slide'))) {
+        $classproperties = array_keys(get_class_vars(SLIDECLASSNAME));
+        if (count($array) !== count($classproperties)) {
             throw new moodle_exception(
-                "Error creating a slide from an array, expected ".count(get_class_vars('slide')).
+                "Error creating a slide from an array, expected ".count($classproperties).
                 " values, got ".count($array)."."
             );
         }
-        return new self(...$array);
+        $reflector = new ReflectionClass(SLIDECLASSNAME);
+        return $reflector->newInstanceArgs($array);
     }
 
     /**
@@ -100,4 +104,5 @@ class slide implements renderable, templatable {
         }
         return $data;
     }
+
 }

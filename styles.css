@@ -7,7 +7,7 @@
 
 .block-envf-slider .arrow:hover,
 .block-envf-slider .slidefooter-item:hover {
-    opacity: 1;
+    animation: end-opacity 1s ease-in forwards;
 }
 
 .block-envf-slider .arrow {
@@ -39,4 +39,17 @@
 .block-envf-slider .glide__track,
 .block-envf-slider .slide-content {
     height: 100%;
+}
+
+.block-envf-slider .slide-content {
+    background-size: cover;
+}
+
+@keyframes end-opacity {
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
 }

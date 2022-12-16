@@ -211,13 +211,15 @@ class block_envf_slider extends block_base {
 
         $slides = [];
         $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
-
+        $imageurls = $this->get_image_urls();
         // Loop for each slide.
-        for ($i = 0; $i < count($this->config->{$this->get_config_property_name($propertynames[0])}); $i++) {
+        $maxindex = count($this->config->{$this->get_config_property_name($propertynames[0])});
+        for ($i = 0; $i < $maxindex; $i++) {
             $array = [];
             foreach ($propertynames as $propertyname) {
                 $array[$propertyname] = $this->config->{$this->get_config_property_name($propertyname)}[$i];
             }
+            $array["image"] = $imageurls[$i];
             $slide = slide::create_from_array($array);
             $slides[] = $slide;
         }
@@ -232,5 +234,41 @@ class block_envf_slider extends block_base {
      */
     private function get_config_property_name($propertyname): string {
         return "slide_$propertyname";
+    }
+
+    /**
+     * @return int|null
+     */
+    private function get_number_of_items() {
+        return count($this->config->slide_id);
+    }
+
+    /**
+     * A method to get all the image urls from their image ids.
+     *
+     * @param $itemids
+     * @return array An array of all the images moodle urls.
+     */
+    public function get_image_urls(): array {
+        $imageurls = [];
+        $fs = get_file_storage();
+        for ($i = 0; $i < $this->get_number_of_items(); $i++) {
+            $allfiles = $fs->get_area_files($this->context->id, 'block_envf_slider', 'images', $i);
+            foreach ($allfiles as $file) {
+                if ($file->is_valid_image()) {
+                    $imageurl = moodle_url::make_pluginfile_url(
+                        $this->context->id,
+                        'block_envf_slider',
+                        'images',
+                        $i,
+                        $file->get_filepath(),
+                        $file->get_filename()
+                    )->out(false);
+                    $imageurls[] = $imageurl;
+                    break;
+                }
+            }
+        }
+        return $imageurls;
     }
 }
