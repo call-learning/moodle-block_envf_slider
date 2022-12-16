@@ -81,7 +81,7 @@ class block_envf_slider extends block_base {
      *
      * @return bool True if the block's configuration is valide, false if not.
      */
-    protected function config_is_valid(): bool {
+    public function config_is_valid(): bool {
         // Check if $this->config is an array or object.
         if (!is_array($this->config) && !is_object($this->config)) {
             return false;
