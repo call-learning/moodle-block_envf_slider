@@ -25,7 +25,6 @@
 use block_envf_slider\output\block;
 use block_envf_slider\output\slide;
 
-const SLIDECLASSNAME = "block_envf_slider\output\slide";
 /**
  * Class block_envf_slider
  *
@@ -61,7 +60,7 @@ class block_envf_slider extends block_base {
                 (debugging() ? '.min' : '') . '.css')
         );
 
-        if (!$this->config_is_valid()) {
+        if (!self::config_is_valid($this->config)) {
             $this->content->text = get_string("invalidconfig", "block_envf_slider");
             return $this->content;
         }
@@ -79,32 +78,37 @@ class block_envf_slider extends block_base {
     /**
      * Checks if the block's configuration is valid.
      *
+     * @param stdClass $config the configuration of the block.
      * @return bool True if the block's configuration is valide, false if not.
      */
-    protected function config_is_valid(): bool {
+    public static function config_is_valid($config): bool {
         // Check if $this->config is an array or object.
-        if (!is_array($this->config) && !is_object($this->config)) {
+        if (!is_array($config) && !is_object($config)) {
             return false;
         }
 
-        if (empty($this->config)) {
+        if (empty($config)) {
             return false;
         }
 
         // Use the get_class_vars() function to get the property names
         // of the Slide class.
-        $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
+        $propertynames = array_keys(get_class_vars(slide::SLIDECLASSNAME));
 
         // Check if all the property names have non-empty values.
-        $numproperties = count($this->config->{"slide_$propertynames[0]"});
+        $configkey = self::get_config_property_name($propertynames[0]);
+        if (!property_exists($config, $configkey)) {
+            return false;
+        }
+        $numproperties = count($config->{$configkey});
 
         foreach ($propertynames as $propertyname) {
-            $configkey = $this->get_config_property_name($propertyname);
-            if (empty($this->config->$configkey)) {
+            $configkey = self::get_config_property_name($propertyname);
+            if (!property_exists($config, $configkey) || empty($config->$configkey)) {
                 // Some config fields are missing.
                 return false;
             }
-            if (count($this->config->$configkey) !== $numproperties) {
+            if (count($config->$configkey) !== $numproperties) {
                 // Some slides are missing at least one config field.
                 return false;
             }
@@ -205,19 +209,19 @@ class block_envf_slider extends block_base {
      * @return array The array of already configured slides.
      */
     public function get_configured_slides(): array {
-        if (!$this->config_is_valid()) {
+        if (!self::config_is_valid($this->config)) {
             throw new moodle_exception("invalidconfig", "block_envf_slider");
         }
 
         $slides = [];
-        $propertynames = array_keys(get_class_vars(SLIDECLASSNAME));
+        $propertynames = array_keys(get_class_vars(slide::SLIDECLASSNAME));
         $imageurls = $this->get_image_urls();
         // Loop for each slide.
-        $maxindex = count($this->config->{$this->get_config_property_name($propertynames[0])});
+        $maxindex = count($this->config->{self::get_config_property_name($propertynames[0])});
         for ($i = 0; $i < $maxindex; $i++) {
             $array = [];
             foreach ($propertynames as $propertyname) {
-                $array[$propertyname] = $this->config->{$this->get_config_property_name($propertyname)}[$i];
+                $array[$propertyname] = $this->config->{self::get_config_property_name($propertyname)}[$i];
             }
             $array["image"] = $imageurls[$i];
             $slide = slide::create_from_array($array);
@@ -229,24 +233,29 @@ class block_envf_slider extends block_base {
     /**
      * Gets the name of a {@see slide} property as used in the block configuration.
      *
-     * @param $propertyname the {@see slide}'s name property.
+     * @param string $propertyname The {@see slide}'s name property.
      * @return string The configuration property associated.
      */
-    private function get_config_property_name($propertyname): string {
+    public static function get_config_property_name($propertyname): string {
         return "slide_$propertyname";
     }
 
     /**
+     * A method to get the correct number of configured slides.
+     * This will count the number of slides in $this->config by counting the number of sildes id in it.
+     * Note that the block's configuration ahs to be valid if we want a correct output.
+     *
+     * See {@see block_envf_slider::config_is_valid()}
+     *
      * @return int|null
      */
-    private function get_number_of_items() {
+    public function get_number_of_items() {
         return count($this->config->slide_id);
     }
 
     /**
-     * A method to get all the image urls from their image ids.
+     * A method to get all the image urls from their image ids in $this->config.
      *
-     * @param $itemids
      * @return array An array of all the images moodle urls.
      */
     public function get_image_urls(): array {

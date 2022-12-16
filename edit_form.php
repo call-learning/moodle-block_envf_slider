@@ -107,12 +107,14 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @staticvar bool $nosubmit keeps track of no submit button
      * @return bool
      */
-    function no_submit_button_pressed() {
+    public function no_submit_button_pressed() {
+        /*
+        Todo what was this for ?
         foreach ($this->mform->_noSubmitButtons as $nosubmitbutton) {
-            if (optional_param_array($nosubmitbutton, null, PARAM_RAW)) {
+            if (optional_param_array($nosubmitbutton, [], PARAM_RAW)) {
                 return true;
             }
-        }
+        }*/
         return parent::no_submit_button_pressed();
     }
 
@@ -146,27 +148,7 @@ class block_envf_slider_edit_form extends block_edit_form {
         $this->mform = $mform;
 
         // Gets all the slides previously added.
-        $slides = $this->get_current_slides();
-        $this->add_slides_elements($slides);
-    }
-
-    /**
-     * Gets all the slides previously added.
-     *
-     * @return array an array containing a stdclass for each slide under this format :
-     * <pre>
-     * "slide": {
-     *      "id": 0,
-     *      "title": "Title of the slide",
-     *      "description": "Description of the slide",
-     *      "image": "image of the slide"
-     * }
-     * </pre>
-     *
-     */
-    private function get_current_slides(): array {
-        // Todo implement get_current_slides() and complete it's php doc.
-        return [];
+        $this->add_slides_elements();
     }
 
     /**
@@ -205,7 +187,7 @@ class block_envf_slider_edit_form extends block_edit_form {
         $repeatarray[] = $mform->createElement(
             'advcheckbox',
             'config_slide_whitetext',
-            get_string('whitetext', 'block_envf_slider'),
+            get_string('config:whitetext', 'block_envf_slider'),
             '',
             null,
             [false, true]

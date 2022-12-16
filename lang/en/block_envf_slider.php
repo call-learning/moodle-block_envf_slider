@@ -24,9 +24,10 @@
 
 $string['pluginname'] = 'ENVF Slider';
 $string['config:addnewslide'] = 'Add a new slide';
-$string['config:slidetitle'] = 'Title of the slide';
-$string['config:slidedescription'] = 'Little text to add in the slide';
-$string['config:slideimage'] = 'Image to display as the background of the slide';
+$string['config:slidetitle'] = 'Title slide {no}';
+$string['config:slidedescription'] = 'Description slide {no}';
+$string['config:slideimage'] = 'Image slide {no}';
+$string['config:whitetext'] = 'White text for slide {no} ?';
 $string['config:deleteslide'] = "Delete this slide";
 $string['config:addmoreslides'] = "Add more slides";
 $string['envf_slider:addinstance'] = 'Add a new ENVF Slider block';
