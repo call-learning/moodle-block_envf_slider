@@ -42,6 +42,6 @@ class block_test extends TestCase {
      * @covers \block_envf_slider\output\block::export_for_template
      */
     public function test_export_for_template() {
-        // Todo implement this method.
+        // Todo implement test_export_for_template method.
     }
 }

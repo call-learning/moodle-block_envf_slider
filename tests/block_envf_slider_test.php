@@ -42,7 +42,7 @@ class block_envf_slider_test extends TestCase {
      * @covers \block_envf_slider::get_image_urls
      */
     public function test_get_image_urls() {
-        // Todo implement this method.
+        // Todo implement test_get_image_urls method.
     }
 
     /**
@@ -53,7 +53,7 @@ class block_envf_slider_test extends TestCase {
      * @covers \block_envf_slider::config_is_valid
      */
     public function test_config_is_valid() {
-        // Todo implement this method.
+        // Todo implement test_config_is_valid method.
     }
 
     /**
@@ -63,6 +63,6 @@ class block_envf_slider_test extends TestCase {
      * @covers \block_envf_slider::get_configured_slides
      */
     public function test_get_configured_slides() {
-        // Todo implement this method.
+        // Todo implement test_get_configured_slides method.
     }
 }

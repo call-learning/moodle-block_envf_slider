@@ -151,25 +151,6 @@ class block_envf_slider_edit_form extends block_edit_form {
     }
 
     /**
-     * Gets all the slides previously added.
-     *
-     * @return array an array containing a stdclass for each slide under this format :
-     * <pre>
-     * "slide": {
-     *      "id": 0,
-     *      "title": "Title of the slide",
-     *      "description": "Description of the slide",
-     *      "image": "image of the slide"
-     * }
-     * </pre>
-     *
-     */
-    private function get_current_slides(): array {
-        // Todo implement get_current_slides() and complete it's php doc.
-        return [];
-    }
-
-    /**
      * A method that add slide elements to the form.
      *
      * <pre>

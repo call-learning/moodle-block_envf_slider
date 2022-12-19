@@ -41,7 +41,7 @@ class slide_test extends TestCase {
      * @covers \block_envf_slider\output\slide::export_for_template
      */
     public function test_export_for_template() {
-        // Todo implement this method.
+        // Todo implement test_export_for_template method.
     }
 
     /**
@@ -51,6 +51,6 @@ class slide_test extends TestCase {
      * @covers \block_envf_slider\output\slide::create_from_array
      */
     public function test_create_from_array() {
-        // Todo implement this method.
+        // Todo implement test_create_from_array method.
     }
 }
