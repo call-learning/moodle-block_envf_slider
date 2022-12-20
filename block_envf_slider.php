@@ -25,8 +25,6 @@
 use block_envf_slider\output\block;
 use block_envf_slider\output\slide;
 
-
-
 /**
  * Class block_envf_slider
  *
@@ -62,7 +60,7 @@ class block_envf_slider extends block_base {
                 (debugging() ? '.min' : '') . '.css')
         );
 
-        if (!$this->config_is_valid()) {
+        if (!self::config_is_valid($this->config)) {
             $this->content->text = get_string("invalidconfig", "block_envf_slider");
             return $this->content;
         }
@@ -80,15 +78,16 @@ class block_envf_slider extends block_base {
     /**
      * Checks if the block's configuration is valid.
      *
+     * @param stdClass $config the configuration of the block.
      * @return bool True if the block's configuration is valide, false if not.
      */
-    public function config_is_valid(): bool {
+    public static function config_is_valid($config): bool {
         // Check if $this->config is an array or object.
-        if (!is_array($this->config) && !is_object($this->config)) {
+        if (!is_array($config) && !is_object($config)) {
             return false;
         }
 
-        if (empty($this->config)) {
+        if (empty($config)) {
             return false;
         }
 
@@ -97,15 +96,19 @@ class block_envf_slider extends block_base {
         $propertynames = array_keys(get_class_vars(slide::SLIDECLASSNAME));
 
         // Check if all the property names have non-empty values.
-        $numproperties = count($this->config->{"slide_$propertynames[0]"});
+        $configkey = self::get_config_property_name($propertynames[0]);
+        if (!property_exists($config, $configkey)) {
+            return false;
+        }
+        $numproperties = count($config->{$configkey});
 
         foreach ($propertynames as $propertyname) {
             $configkey = self::get_config_property_name($propertyname);
-            if (empty($this->config->$configkey)) {
+            if (!property_exists($config, $configkey) || empty($config->$configkey)) {
                 // Some config fields are missing.
                 return false;
             }
-            if (count($this->config->$configkey) !== $numproperties) {
+            if (count($config->$configkey) !== $numproperties) {
                 // Some slides are missing at least one config field.
                 return false;
             }
@@ -206,7 +209,7 @@ class block_envf_slider extends block_base {
      * @return array The array of already configured slides.
      */
     public function get_configured_slides(): array {
-        if (!$this->config_is_valid()) {
+        if (!self::config_is_valid($this->config)) {
             throw new moodle_exception("invalidconfig", "block_envf_slider");
         }
 

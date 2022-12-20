@@ -24,9 +24,10 @@
 
 namespace block_envf_slider;
 
+use advanced_testcase;
 use block_envf_slider;
-use block_envf_slider\output\slide;
-use PHPUnit\Framework\TestCase;
+use context_system;
+use moodle_page;
 
 /**
  * Unit tests for the block_envf_slider class.
@@ -34,7 +35,7 @@ use PHPUnit\Framework\TestCase;
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_envf_slider_test extends TestCase {
+class block_envf_slider_test extends advanced_testcase {
 
     /**
      * @var block_envf_slider $block an object from the tested class to be used in the tests.
@@ -48,7 +49,52 @@ class block_envf_slider_test extends TestCase {
      * @return void
      */
     public function setUp(): void {
-        $this->block = new block_envf_slider();
+        global $CFG, $DB;
+        $this->resetAfterTest();
+        require_once($CFG->dirroot.'/blocks/moodleblock.class.php');
+        require_once($CFG->dirroot."/blocks/envf_slider/block_envf_slider.php");
+        $this->record = (object) [
+            "slide_id" => [0, 1, 2],
+            "slide_title" => ["title1", "title2", "title3"],
+            "slide_description" => ["description1", "description2", "description3"],
+            "slide_image" => [],
+            "slide_whitetext" => [true, false, true]
+        ];
+
+        $page = new moodle_page();
+        $page->set_context(context_system::instance());
+        $page->set_pagelayout('frontpage');
+        $blockname = 'envf_slider';
+        $page->blocks->load_blocks();
+        $page->blocks->add_block_at_end_of_default_region($blockname);
+        // Here we need to work around the block API. In order to get 'get_blocks_for_region' to work,
+        // we would need to reload the blocks (as it has been added to the DB but is not
+        // taken into account in the block manager).
+        // The only way to do it is to recreate a page so it will reload all the block.
+        // It is a main flaw in the  API (not being able to use load_blocks twice).
+        // Alternatively if birecordsbyregion was nullable,
+        // should for example have a load_block + create_all_block_instances and
+        // should be able to access to the block.
+        $page = new moodle_page();
+        $page->set_context(context_system::instance());
+        $page->set_pagelayout('frontpage');
+        $page->blocks->load_blocks();
+        $blocks = $page->blocks->get_blocks_for_region($page->blocks->get_default_region());
+        $block = end($blocks);
+        $block = block_instance($blockname, $block->instance);
+
+        $this->block = $block;
+        $fs = get_file_storage();
+        $test = $fs->add_file_to_pool($CFG->dirroot . "/../photoprofg4.jpg");
+        $test1 = $fs->add_file_to_pool($CFG->dirroot . "/../photoprofg4.jpg");
+        $test2 = $fs->add_file_to_pool($CFG->dirroot . "/../photoprofg4.jpg");
+        $files = $fs->get_area_files($block->context->id, 'block_evf_slider', 'sha1');
+        // Todo add images.
+        $this->record->id = $DB->insert_record('block_envf_slider', $this->record);
+
+        $block->instance_config_save((object) $configdata);
+        $this->block = $block;
+        $block = block_instance_by_id($this->block->instance->id);
     }
 
     /**
@@ -67,23 +113,66 @@ class block_envf_slider_test extends TestCase {
      *
      * @return void
      * @covers \block_envf_slider::config_is_valid
+     * @dataProvider config_provider
      */
-    public function test_config_is_valid() {
-        $properties = get_class_vars(slide::SLIDECLASSNAME);
-        foreach ($properties as $property) {
-            assertTrue(property_exists($this->block->config, block_envf_slider::get_config_property_name($property)));
-        }
+    public function test_config_is_valid($config, $expectedresult) {
+        self::assertEquals($expectedresult, block_envf_slider::config_is_valid($config));
     }
 
     /**
-     * Tests if the {@see block_envf_slider::get_configured_slides()} returns all the configured slides and well configured.
+     * A data provider used in {@see block_envf_slider_test::test_config_is_valid()} to provide some test cases.
      *
-     * @return void
-     * @covers \block_envf_slider::get_configured_slides
+     * Note that once we get to php 8.x, we'll be able to check properties's types and add these cases :
+     *
+     *      "Wrong types (str)" => [
+     *          (object)[
+     *              "slide_id" => ["im an id"],
+     *              "slide_title" => ["title"],
+     *              "slide_description" => ["description"],
+     *              "slide_image" => ["4510"],
+     *              "slide_whitetext" => ["true"]
+     *          ], false
+     *      ],
+     *      "Wrong types (int)" => [
+     *          (object)[
+     *              "slide_id" => [0],
+     *              "slide_title" => [0],
+     *              "slide_description" => [0],
+     *              "slide_image" => [0],
+     *              "slide_whitetext" => [0]
+     *          ], false
+     *      ]
+     *
+     * @return array[] Some test cases for the {@see block_envf_slider_test::test_config_is_valid()} method.
      */
-    public function test_get_configured_slides() {
-        $numslides = $this->block->get_number_of_items();
-        $configuredslides = $this->block->get_configured_slides();
-        self::assertEquals($numslides, count($configuredslides));
+    public function config_provider(): array {
+        return [
+            "Valid configuration" => [
+                (object)[
+                "slide_id" => [0],
+                "slide_title" => ["title"],
+                "slide_description" => ["description"],
+                "slide_image" => ["4510"],
+                "slide_whitetext" => [true]
+                ], true
+            ],
+            "Missing a field" => [
+                (object)[
+                    "slide_title" => ["title"],
+                    "slide_description" => ["description"],
+                    "slide_image" => ["4510"],
+                    "slide_whitetext" => [true]
+                ], false
+            ],
+            "Not as many items for each element" => [
+                (object)[
+                    "slide_id" => [0],
+                    "slide_title" => ["title1", "title2"],
+                    "slide_description" => ["description"],
+                    "slide_image" => ["4510"],
+                    "slide_whitetext" => [true]
+                ], false
+            ],
+        ];
     }
 }

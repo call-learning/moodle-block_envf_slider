@@ -108,11 +108,13 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @return bool
      */
     public function no_submit_button_pressed() {
+        /*
+        Todo what was this for ?
         foreach ($this->mform->_noSubmitButtons as $nosubmitbutton) {
-            if (optional_param_array($nosubmitbutton, null, PARAM_RAW)) {
+            if (optional_param_array($nosubmitbutton, [], PARAM_RAW)) {
                 return true;
             }
-        }
+        }*/
         return parent::no_submit_button_pressed();
     }
 
@@ -185,7 +187,7 @@ class block_envf_slider_edit_form extends block_edit_form {
         $repeatarray[] = $mform->createElement(
             'advcheckbox',
             'config_slide_whitetext',
-            get_string('whitetext', 'block_envf_slider'),
+            get_string('config:whitetext', 'block_envf_slider'),
             '',
             null,
             [false, true]

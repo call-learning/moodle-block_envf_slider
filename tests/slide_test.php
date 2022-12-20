@@ -27,7 +27,6 @@ namespace block_envf_slider;
 use block_envf_slider\output\renderer;
 use block_envf_slider\output\slide;
 use PHPUnit\Framework\TestCase;
-use ReflectionProperty;
 
 /**
  * Unit tests for the block_envf_slider slides.
@@ -38,22 +37,6 @@ use ReflectionProperty;
 class slide_test extends TestCase {
 
     /**
-     * A method to initialize a slide with dummy properties.
-     * The slide class being made the way that of its properties are in complete abstraction, we will use the
-     * {@see slide::create_from_array()} method to create a slide with as property values the name of these properties.
-     *
-     * Note that all the properties get a string as value. We've made it this way to be compatible with older version than php 8.x.
-     * When we'll start to type our properties, we'll have to use the {@see \ReflectionType} class to provide correct values to
-     * the slide object.
-     *
-     * @return slide A slide object with dummy properties.
-     */
-    public static function init_dummy_slide(): slide {
-        $properties = array_keys(get_class_vars(slide::SLIDECLASSNAME));
-        return slide::create_from_array($properties);
-    }
-
-    /**
      * Tests if the {@see slide::export_for_template()}} method returns the right data to be expoloit in the slide template.
      *
      * @return void
@@ -61,7 +44,7 @@ class slide_test extends TestCase {
      */
     public function test_export_for_template() {
 
-        $slide = self::init_dummy_slide();
+        $slide = slide::init_dummy_slide();
         $renderer = new renderer(new \moodle_page(), null);
         $data = $slide->export_for_template($renderer);
 

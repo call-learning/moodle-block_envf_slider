@@ -110,4 +110,20 @@ class slide implements renderable, templatable {
         return $data;
     }
 
+    /**
+     * A method to initialize a slide with dummy properties.
+     * The slide class being made the way that of its properties are in complete abstraction, we will use the
+     * {@see slide::create_from_array()} method to create a slide with as property values the name of these properties.
+     *
+     * Note that all the properties get a string as value. We've made it this way to be compatible with older version than php 8.x.
+     * When we'll start to type our properties, we'll have to use the {@see \ReflectionType} class to provide correct values to
+     * the slide object.
+     *
+     * @return slide A slide object with dummy properties.
+     */
+    public static function init_dummy_slide(): slide {
+        $properties = array_keys(get_class_vars(self::SLIDECLASSNAME));
+        return self::create_from_array($properties);
+    }
+
 }
