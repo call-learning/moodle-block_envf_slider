@@ -25,6 +25,7 @@
 namespace block_envf_slider;
 
 use block_envf_slider;
+use block_envf_slider\output\slide;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -46,7 +47,7 @@ class block_envf_slider_test extends TestCase {
      *
      * @return void
      */
-    private function init() {
+    public function setUp(): void {
         $this->block = new block_envf_slider();
     }
 
@@ -68,8 +69,7 @@ class block_envf_slider_test extends TestCase {
      * @covers \block_envf_slider::config_is_valid
      */
     public function test_config_is_valid() {
-        $this->init();
-        $properties = get_class_vars(block_envf_slider\output\slide::SLIDECLASSNAME);
+        $properties = get_class_vars(slide::SLIDECLASSNAME);
         foreach ($properties as $property) {
             assertTrue(property_exists($this->block->config, block_envf_slider::get_config_property_name($property)));
         }

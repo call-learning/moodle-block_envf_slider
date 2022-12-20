@@ -48,7 +48,7 @@ class slide_test extends TestCase {
      *
      * @return slide A slide object with dummy properties.
      */
-    private function init_dummy_slide(): slide {
+    public static function init_dummy_slide(): slide {
         $properties = array_keys(get_class_vars(slide::SLIDECLASSNAME));
         return slide::create_from_array($properties);
     }
@@ -60,12 +60,14 @@ class slide_test extends TestCase {
      * @covers \block_envf_slider\output\slide::export_for_template
      */
     public function test_export_for_template() {
-        $slide = $this->init_dummy_slide();
-        $renderer = new renderer();
+
+        $slide = self::init_dummy_slide();
+        $renderer = new renderer(new \moodle_page(), null);
         $data = $slide->export_for_template($renderer);
+
         foreach ($data as $key => $value) {
             self::assertTrue(property_exists($slide, $key));
-            self::assertEquals(count(array_keys(get_class_vars($slide))), count($sata));
+            self::assertEquals(count(array_keys(get_class_vars(slide::SLIDECLASSNAME))), count($data));
         }
     }
 
@@ -76,8 +78,11 @@ class slide_test extends TestCase {
      * @covers \block_envf_slider\output\slide::create_from_array
      */
     public function test_create_from_array() {
+
         $properties = array_keys(get_class_vars(slide::SLIDECLASSNAME));
         $slide = slide::create_from_array($properties);
+
+        self::assertEquals(count($properties), count(get_object_vars($slide)));
         foreach ($properties as $property) {
             self::assertEquals($property, $slide->{$property});
         }

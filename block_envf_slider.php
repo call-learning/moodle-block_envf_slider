@@ -230,7 +230,7 @@ class block_envf_slider extends block_base {
     /**
      * Gets the name of a {@see slide} property as used in the block configuration.
      *
-     * @param $propertyname the {@see slide}'s name property.
+     * @param string $propertyname The {@see slide}'s name property.
      * @return string The configuration property associated.
      */
     public static function get_config_property_name($propertyname): string {
@@ -251,9 +251,8 @@ class block_envf_slider extends block_base {
     }
 
     /**
-     * A method to get all the image urls from their image ids.
+     * A method to get all the image urls from their image ids in $this->config.
      *
-     * @param $itemids
      * @return array An array of all the images moodle urls.
      */
     public function get_image_urls(): array {

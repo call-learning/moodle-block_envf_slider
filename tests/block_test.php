@@ -24,6 +24,10 @@
 
 namespace block_envf_slider;
 
+use block_envf_slider\output\block;
+use block_envf_slider\output\renderer;
+use block_envf_slider\slide_test;
+use moodle_page;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -42,6 +46,13 @@ class block_test extends TestCase {
      * @covers \block_envf_slider\output\block::export_for_template
      */
     public function test_export_for_template() {
-        // Todo implement test_export_for_template method.
+        $slides = [];
+        $maxindex = 5;
+        for ($i = 0; $i < $maxindex; $i++) {
+            $slides[] = slide_test::init_dummy_slide();
+        }
+        $block = new block($slides);
+        $data = $block->export_for_template(new renderer(new moodle_page(), null));
+        self::assertEquals($maxindex, count($data["slides"]));
     }
 }
