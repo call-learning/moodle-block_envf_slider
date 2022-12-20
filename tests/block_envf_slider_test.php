@@ -24,6 +24,7 @@
 
 namespace block_envf_slider;
 
+use block_envf_slider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,8 +33,22 @@ use PHPUnit\Framework\TestCase;
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class block_envf_slider_test extends TestCase {
+
+    /**
+     * @var block_envf_slider $block an object from the tested class to be used in the tests.
+     * It is initialized in the {@see block_envf_slider_test::init()} method.
+     */
+    private block_envf_slider $block;
+
+    /**
+     * A method to initialize a block to be able to test properly all the {@see block_envf_slider}'s methods.
+     *
+     * @return void
+     */
+    private function init() {
+        $this->block = new block_envf_slider();
+    }
 
     /**
      * Tests if the {@see block_envf_slider::get_image_urls()} method returns valid  and useable image urls.
@@ -53,7 +68,11 @@ class block_envf_slider_test extends TestCase {
      * @covers \block_envf_slider::config_is_valid
      */
     public function test_config_is_valid() {
-        // Todo implement test_config_is_valid method.
+        $this->init();
+        $properties = get_class_vars(block_envf_slider\output\slide::SLIDECLASSNAME);
+        foreach ($properties as $property) {
+            assertTrue(property_exists($this->block->config, block_envf_slider::get_config_property_name($property)));
+        }
     }
 
     /**
@@ -63,6 +82,8 @@ class block_envf_slider_test extends TestCase {
      * @covers \block_envf_slider::get_configured_slides
      */
     public function test_get_configured_slides() {
-        // Todo implement test_get_configured_slides method.
+        $numslides = $this->block->get_number_of_items();
+        $configuredslides = $this->block->get_configured_slides();
+        self::assertEquals($numslides, count($configuredslides));
     }
 }

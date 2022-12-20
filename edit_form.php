@@ -107,7 +107,7 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @staticvar bool $nosubmit keeps track of no submit button
      * @return bool
      */
-    function no_submit_button_pressed() {
+    public function no_submit_button_pressed() {
         foreach ($this->mform->_noSubmitButtons as $nosubmitbutton) {
             if (optional_param_array($nosubmitbutton, null, PARAM_RAW)) {
                 return true;
@@ -146,8 +146,7 @@ class block_envf_slider_edit_form extends block_edit_form {
         $this->mform = $mform;
 
         // Gets all the slides previously added.
-        $slides = $this->get_current_slides();
-        $this->add_slides_elements($slides);
+        $this->add_slides_elements();
     }
 
     /**

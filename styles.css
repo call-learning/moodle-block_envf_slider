@@ -7,11 +7,28 @@
 
 .block-envf-slider .arrow:hover,
 .block-envf-slider .slidefooter-item:hover {
-    animation: end-opacity 1s ease-in forwards;
+    animation: end-opacity 150ms ease-in forwards;
+}
+
+@keyframes end-opacity {
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.block-envf-slider .slidefooter-item {
+    width: 50px;
+    height: 10px;
+    opacity: 0.7;
+    background-color: #fff;
+    box-shadow: 0 0 10px #444;
 }
 
 .block-envf-slider .arrow {
-    font-size: 4rem;
+    font-size: 4em;
     text-shadow: 0 0 10px #444;
     opacity: 0.5;
 }
@@ -20,14 +37,6 @@
     width: 100%;
     height: 60vh;
     z-index: 10;
-}
-
-.block-envf-slider .slidefooter-item {
-    width: 50px;
-    height: 10px;
-    opacity: 0.5;
-    background-color: #fff;
-    box-shadow: 0 0 10px #444;
 }
 
 .block-envf-slider .text-container {
@@ -43,13 +52,4 @@
 
 .block-envf-slider .slide-content {
     background-size: cover;
-}
-
-@keyframes end-opacity {
-    0% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
 }
