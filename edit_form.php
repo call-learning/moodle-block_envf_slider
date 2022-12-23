@@ -98,8 +98,8 @@ class block_envf_slider_edit_form extends block_edit_form {
      * Get number of repeats
      */
     protected function get_current_repeats() {
-        $idcount = empty($this->block->config->slide_id) ? 0 : count($this->block->config->slide_id);
-        return $idcount;
+        $repeats = $this->mform->getElement('slides_repeats');
+        return $repeats instanceof HTML_QuickForm_Error ? 0 : $repeats->getValue();
     }
 
     /**
@@ -144,7 +144,6 @@ class block_envf_slider_edit_form extends block_edit_form {
         $repeatarray = array();
         $repeatedoptions = array();
 
-        // Todo : fix slides ids always set to 0.
         $numberofslides = $this->get_current_repeats();
         $repeatarray[] = $mform->createElement(
             'hidden',
