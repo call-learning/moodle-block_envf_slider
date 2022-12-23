@@ -118,7 +118,7 @@ class block_envf_slider extends block_base {
 
 
     /**
-     * Serialize and store config data
+     * Serialize and store config data.
      *
      * @param stdClass $data
      * @param false $nolongerused
@@ -152,6 +152,10 @@ class block_envf_slider extends block_base {
             }
         }
         parent::instance_config_save($config, $nolongerused);
+        if (empty($this->config)) {
+            // Error I couldn't fix in another way so i put here a solution that is not the best but that will work.
+            $this->config = $config;
+        }
     }
 
     /**

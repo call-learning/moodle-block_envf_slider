@@ -10,23 +10,20 @@ Feature: Adding and deleting slides in ENVF slider block
     And I add the "ENVF Slider" block
     And I configure the "ENVF Slider" block
 
-    And I press "Add more slides"
+  @javascript @_file_upload
+  Scenario Outline: Deleting the last slide, this should result in only one slide remaining and visible on the homepage.
+
+    Given I press "Add more slides"
     And I set the field "Title slide 1" to "Test title 1"
     And I set the field "Description slide 1" to "Test description 1"
     And I upload "blocks/envf_slider/tests/fixtures/stonks.jpg" file to "Image slide 1" filemanager
-    And I click on "White text for slide 1 ?" "checkbox"
 
     And I press "Add more slides"
     And I set the field "Title slide 2" to "Test title 2"
     And I set the field "Description slide 2" to "Test description 2"
     And I upload "blocks/envf_slider/tests/fixtures/phpstormlogo.png" file to "Image slide 2" filemanager
-    And I press "Save changes"
 
-  @javascript
-  Scenario: Deleting the last slide, this should result in only one slide remaining and visible on the homepage.
-
-    Given I configure the "ENVF Slider" block
-    When I click on "config_slide_delete[1]" "button"
+    When I click on "<delete_slide_button_name>" "button"
 
     Then I should see "Title slide 1"
     And I should see "Description slide 1"
@@ -36,18 +33,10 @@ Feature: Adding and deleting slides in ENVF slider block
     And I should not see "Description slide 2"
     And I should not see "White text for slide 2 ?"
 
-  @javascript @_file_upload
-  Scenario: Deleting the first slide, this should result in only one slide remaining and visible on the homepage and the indexes of
-  the second slide should be switched to 1.
+    And the field "Title slide 1" should be set to "Test title <remaining_slide_number>"
+    And the field "Description slide 1" should be set to "Test description <remaining_slide_number>"
 
-    Given I configure the "ENVF Slider" block
-    When I click on "config_slide_delete[0]" "button"
-
-    Then I should see "Title slide 1"
-    And I should see "Description slide 1"
-    And I should see "White text for slide 1 ?"
-
-    And I should not see "Title slide 2"
-    And I should not see "Description slide 2"
-    And I should not see "White text for slide 2 ?"
-
+    Examples:
+    | delete_slide_button_name | remaining_slide_number |
+    | config_slide_delete[1]   | 1                      |
+    | config_slide_delete[0]   | 2                      |

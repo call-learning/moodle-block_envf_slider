@@ -27,6 +27,8 @@ namespace block_envf_slider;
 use advanced_testcase;
 use block_envf_slider;
 use context_system;
+use context_user;
+use core_files_external;
 use moodle_page;
 
 /**
@@ -48,19 +50,12 @@ class block_envf_slider_test extends advanced_testcase {
      *
      * @return void
      */
-    public function setUp(): void {
-        global $CFG, $DB;
+    public function init(): void {
+        global $CFG;
         $this->resetAfterTest();
-        require_once($CFG->dirroot.'/blocks/moodleblock.class.php');
-        require_once($CFG->dirroot."/blocks/envf_slider/block_envf_slider.php");
-        $this->record = (object) [
-            "slide_id" => [0, 1, 2],
-            "slide_title" => ["title1", "title2", "title3"],
-            "slide_description" => ["description1", "description2", "description3"],
-            "slide_image" => [],
-            "slide_whitetext" => [true, false, true]
-        ];
-
+        $this->user = $this->getDataGenerator()->create_user();
+        $this->setUser($this->user);
+        // Create a Sponsor block.
         $page = new moodle_page();
         $page->set_context(context_system::instance());
         $page->set_pagelayout('frontpage');
@@ -82,19 +77,11 @@ class block_envf_slider_test extends advanced_testcase {
         $blocks = $page->blocks->get_blocks_for_region($page->blocks->get_default_region());
         $block = end($blocks);
         $block = block_instance($blockname, $block->instance);
-
         $this->block = $block;
-        $fs = get_file_storage();
-        $test = $fs->add_file_to_pool($CFG->dirroot . "/../photoprofg4.jpg");
-        $test1 = $fs->add_file_to_pool($CFG->dirroot . "/../photoprofg4.jpg");
-        $test2 = $fs->add_file_to_pool($CFG->dirroot . "/../photoprofg4.jpg");
-        $files = $fs->get_area_files($block->context->id, 'block_evf_slider', 'sha1');
-        // Todo add images.
-        $this->record->id = $DB->insert_record('block_envf_slider', $this->record);
-
-        $block->instance_config_save((object) $configdata);
-        $this->block = $block;
-        $block = block_instance_by_id($this->block->instance->id);
+        $this->upload_files_in_block([
+            $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/stonks.jpg",
+            $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/phpstormlogo.png"
+        ]);
     }
 
     /**
@@ -104,7 +91,13 @@ class block_envf_slider_test extends advanced_testcase {
      * @covers \block_envf_slider::get_image_urls
      */
     public function test_get_image_urls() {
-        // Todo implement test_get_image_urls method.
+        $this->init();
+        $urls = $this->block->get_image_urls();
+        foreach ($urls as $url) {
+            $parts = parse_url($url);
+            $imagepath = $parts['path'];
+            // Todo : Check if the imagepath is valid.
+        }
     }
 
     /**
@@ -120,9 +113,63 @@ class block_envf_slider_test extends advanced_testcase {
     }
 
     /**
+     * @return void
+     * @covers \block_envf_slider\block_envf_slider_edit_form::delete_slide()
+     * @dataProvider preg_match_provider
+     */
+    public function test_pregmatch_for_config_fields_in_editform($string, $expectedoutput) {
+        $pregexpression = '/^slide_\S+/';
+        self::assertEquals($expectedoutput, (bool) preg_match($pregexpression, $string));
+    }
+
+    /**
+     * TODO check this method to initialise block_envf_slider
+     *
+     * (source : {@see \block_thumblinks_action\block_thumblinks_action_test::upload_files_in_block()})
+     *
+     * Upload a file/image in the block
+     *
+     * @param array $imagesnames
+     */
+    protected function upload_files_in_block($imagesnames) {
+        $usercontext = context_user::instance($this->user->id);
+        $configdata = (object) [
+            'slide_id' => [],
+            'slide_title' => [],
+            'slide_description' => [],
+        ];
+        $configdata->slide_image = [];
+        foreach ($imagesnames as $index => $filepath) {
+            $draftitemid = file_get_unused_draft_itemid();
+            $patharray = explode("/", $filepath);
+            $filename = end($patharray);
+            $filerecord = array(
+                'contextid' => $usercontext->id,
+                'component' => 'user',
+                'filearea' => 'draft',
+                'itemid' => $draftitemid,
+                'filepath' => "/",
+                'filename' => $filename,
+            );
+            // Create an area to upload the file.
+            $fs = get_file_storage();
+            // Create a file from the string that we made earlier.
+            $file = $fs->create_file_from_pathname(
+                $filerecord,
+                $filepath
+            );
+            $configdata->slide_id[] = $index;
+            $configdata->slide_title[] = 'Title ' . $index;
+            $configdata->slide_description[] = 'Description' . $index;
+            $configdata->slide_image[] = $file->get_itemid();
+        }
+        $this->block->instance_config_save($configdata);
+    }
+
+    /**
      * A data provider used in {@see block_envf_slider_test::test_config_is_valid()} to provide some test cases.
      *
-     * Note that once we get to php 8.x, we'll be able to check properties's types and add these cases :
+     * Note that once we get to php 8.x, we'll be able to check property's types and add these cases :
      *
      *      "Wrong types (str)" => [
      *          (object)[
@@ -173,6 +220,19 @@ class block_envf_slider_test extends advanced_testcase {
                     "slide_whitetext" => [true]
                 ], false
             ],
+        ];
+    }
+
+    public function preg_match_provider() {
+        return [
+            "valid1" => [ "slide_something", true ],
+            "valid2" => [ "slide_other", true ],
+            "slide plural" => [ "slides_something", false ],
+            "slide_ with nothing after" => [ "slide_", false ],
+            "slide_ in the middle" => [ "fjoisdf_slide_something", false ],
+            "slide in the end" => [ "something_slide_", false ],
+            "slide with nothing after" => [ "slide", false ],
+            "slide incomplete" => [ "sli", false ]
         ];
     }
 }
