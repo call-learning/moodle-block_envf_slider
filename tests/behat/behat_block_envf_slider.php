@@ -18,7 +18,7 @@
  * File containing a class with additionnal step definitions for the ENVF slider block..
  *
  * @package     block_envf_slider
- * @copyright   2022 - CALL Learning
+ * @copyright   2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author      Martin CORNU-MANSUY <martin@call-learning>
  */
@@ -29,7 +29,7 @@ use Behat\Mink\Element\NodeElement;
  *  Behat customisations for the block
  *
  * @package     block_envf_slider
- * @copyright   2022 - CALL Learning
+ * @copyright   2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author      Martin CORNU-MANSUY <martin@call-learning>
  */
@@ -46,22 +46,36 @@ class behat_block_envf_slider extends behat_base {
      * @param string $blocktitle The title of the block in wich we want to find the text.
      * @throws Exception If the text is not found. Note that the {@see behat_block_envf_slider::get_block_by_title()} method will
      * also throw an exception if the specified block doesn't exist.
-     * @Then /^I should see "([^"]*)" in the "([^"]*)" block$/
+     * @Then I should see :text in the :blocktitle block
      */
     public function i_should_see_in_the_block($text, $blocktitle) {
         // Find the block element using its title.
         $blockelement = $this->get_block_by_title($blocktitle);
 
         // Get all the text inside the block.
-        $blocktext = $blockelement->getText();
-        if (!strpos($blocktext, $text)) {
+        $blockhtml = $blockelement->getHtml();
+
+        if (!strpos($blockhtml, $text)) {
             throw new Exception("Text '$text' not found in the block with title '$blocktitle'.");
         }
     }
 
     /**
-     * @Then /^I should see the image "([^"]*)" in the "([^"]*)" block$/
-     * TODO : try to get the moodle url of the image, to do so, find a way to get the object of block_envf_slider.
+     * @Then the checkbox :checkbox should be checked
+     */
+    public function the_checkbox_should_be_checked($checkbox) {
+        $this->assertSession()->checkboxChecked($checkbox);
+    }
+
+    /**
+     * @Then the field :field should be set to :value
+     */
+    public function the_field_should_be_set_to($field, $value) {
+        $this->assertSession()->fieldValueEquals($field, $value);
+    }
+
+    /**
+     * @Then I should see the image :image in the :blocktitle block
      */
     public function i_should_see_the_image_in_the_block($image, $blocktitle) {
         // Find the block element using its title.
@@ -79,12 +93,11 @@ class behat_block_envf_slider extends behat_base {
             $style = $slide->getAttribute('style');
             // Check if the style attribute contains the background-image property with the expected image file name as the value.
             if (strpos($style, $imagename)) {
-                return true; // Returns something to end the loop.
+                return; // Return to end the loop.
             }
         }
         throw new Exception("Image '$imagename' not found as the background image of any slide in block '$blocktitle'.");
     }
-
 
     /**
      * Find the block element using its title.

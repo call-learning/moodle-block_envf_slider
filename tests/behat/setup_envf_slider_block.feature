@@ -11,8 +11,10 @@ Feature: Adding and configuring ENVF slider block
     And I am on site homepage
     And I turn editing mode on
     And I add the "ENVF Slider" block
+
     When I configure the "ENVF Slider" block
     And I press "Add more slides"
+
     Then I should see "Title slide 1"
     And I should see "Description slide 1"
     And I should see "White text for slide 1 ?"
@@ -43,5 +45,5 @@ Feature: Adding and configuring ENVF slider block
     And I should see "Test title 2" in the "ENVF Slider" block
     And I should see "Test description 1" in the "ENVF Slider" block
     And I should see "Test description 2" in the "ENVF Slider" block
-    And I should see the image "blocks/envf_slider/tests/fixtures/stonks.jpg" in the "ENVF Slider" block
+    And I should see the image "stonks.jpg" in the "ENVF Slider" block
     And I should see the image "phpstormlogo.png" in the "ENVF Slider" block

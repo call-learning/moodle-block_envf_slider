@@ -48,23 +48,11 @@ class block_envf_slider_edit_form extends block_edit_form {
     public function set_data($defaults) {
         parent::set_data($defaults);
         if ($this->no_submit_button_pressed()) {
-            $slidetodelete = optional_param_array('config_slide_delete', [], PARAM_RAW);
-            if (!empty($slidetodelete)) {
-                foreach (array_keys($slidetodelete) as $slideindex) {
-                    if (isset($this->block->config->slide_title[$slideindex])) {
-                        unset($this->block->config->slide_title[$slideindex]);
-                        unset($this->block->config->slide_description[$slideindex]);
-                        unset($this->block->config->slide_image[$slideindex]);
-                    }
-                }
-                // Reindex and submit to the form.
-                $fields = [
-                    'config_slide_title' => array_values($this->block->config->slide_title),
-                    'config_slide_description' => array_values($this->block->config->slide_description),
-                    'config_slide_image' => array_values($this->block->config->slide_image),
-                ];
-                moodleform::set_data($fields);
-            }
+            $optionalparamarray = optional_param_array('config_slide_delete', [], PARAM_RAW);
+            $optionalparam = array_shift($optionalparamarray);
+            $slidetodelete = explode('°', $optionalparam)[1];
+            $newfields = $this->delete_slide(intval($slidetodelete) - 1);
+            moodleform::set_data($newfields);
         }
         // Restore filemanager fields.
         // This is a bit of a hack working around the issues of the block.
@@ -95,35 +83,23 @@ class block_envf_slider_edit_form extends block_edit_form {
 
                 $filefields->{$fieldname}[$index] = $draftitemid;
             }
-            moodleform::set_data($filefields);
-        }
-    }
 
-    /**
-     * Checks if button pressed is not for submitting the form
-     *
-     * This is an override of the base method to ensure that array will also be processsed
-     *
-     * @staticvar bool $nosubmit keeps track of no submit button
-     * @return bool
-     */
-    public function no_submit_button_pressed() {
-        /*
-        Todo what was this for ?
-        foreach ($this->mform->_noSubmitButtons as $nosubmitbutton) {
-            if (optional_param_array($nosubmitbutton, [], PARAM_RAW)) {
-                return true;
-            }
-        }*/
-        return parent::no_submit_button_pressed();
+            moodleform::set_data($filefields);
+
+            // Todo moodleform::getData returns wrong config values with 2ids and whitetext instead of 1.
+            // To reproduce : create 2 slides, save changes & delete one slide.
+            // Todo find another way to do this.
+            // Force saving the configuration but this makes us unable to cancel or undo changes.
+            $this->block->instance_config_save($this->block->config);
+        }
     }
 
     /**
      * Get number of repeats
      */
     protected function get_current_repeats() {
-        $titlecount = empty($this->block->config->slide_title) ? 0 : count($this->block->config->slide_title);
-        return $titlecount;
+        $repeats = $this->mform->getElement('slides_repeats');
+        return $repeats instanceof HTML_QuickForm_Error ? 0 : $repeats->getValue();
     }
 
     /**
@@ -146,7 +122,6 @@ class block_envf_slider_edit_form extends block_edit_form {
      */
     protected function specific_definition($mform) {
         $this->mform = $mform;
-
         // Gets all the slides previously added.
         $this->add_slides_elements();
     }
@@ -165,14 +140,15 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @return void
      */
     private function add_slides_elements() {
-        $mform = $this->mform;
+        $mform =& $this->mform;
         $repeatarray = array();
         $repeatedoptions = array();
 
+        $numberofslides = $this->get_current_repeats();
         $repeatarray[] = $mform->createElement(
             'hidden',
-            'config_slide_id',
-            $this->get_current_repeats()
+            "config_slide_id",
+            $numberofslides
         );
         $repeatedoptions['config_slide_id']['type'] = PARAM_INT;
 
@@ -217,5 +193,52 @@ class block_envf_slider_edit_form extends block_edit_form {
             true
         );
 
+    }
+
+    /**
+     * Todo: complete phpdoc.
+     *
+     * @param int $slideindex
+     * @return array
+     */
+    private function delete_slide($slideindex): array {
+        $mform =& $this->mform;
+        if (is_int($slideindex)) {
+            if (isset($this->block->config->slide_id[$slideindex])) {
+                $slidenumber = $this->get_current_repeats();
+                for ($i = $slideindex + 1; $i < $slidenumber; $i++) {
+                    // Setting new id values for all the slides that comes after the one we're deleting.
+                    $newid = $this->block->config->slide_id[$i] - 1;
+                    $this->block->config->slide_id[$i] = $newid;
+                    $idelement = $mform->getElement("config_slide_id[$i]");
+                    $idelement->setValue($newid);
+                }
+                foreach ($this->block->config as $configfieldname => $configfieldvalue) {
+                    if (preg_match('/^slide_\S+/', $configfieldname)) {
+                        $elementname = "config_{$configfieldname}[$slideindex]";
+                        $mform->removeElement($elementname);
+
+                        // TODO during the loop in formslib::exportValues,
+                        // $this->_elements contains values as set as we didn't deleted the slide.
+                        // Even with these 3 unset calls and the previous removeElement call.
+                        unset($mform->_elements[$mform->_elementIndex[$elementname]]);
+                        unset($mform->_elementIndex[$elementname]);
+                        unset($this->block->config->{$configfieldname}[$slideindex]);
+                    }
+                }
+                $mform->removeElement("config_slide_delete[$slideindex]");
+                $mform->getElement("slides_repeats")->setValue($slidenumber - 1);
+            }
+            $mform->_elements = array_values($mform->_elements);
+        } else {
+            debugging("Warning ! Wrong value '$slideindex' passed to slideindex in block_envf_slider::delete_slide(int) method.");
+        }
+        // Reindex and submit to the form.
+        return [
+            'config_slide_id' => array_values($this->block->config->slide_id),
+            'config_slide_title' => array_values($this->block->config->slide_title),
+            'config_slide_description' => array_values($this->block->config->slide_description),
+            'config_slide_image' => array_values($this->block->config->slide_image),
+        ];
     }
 }
