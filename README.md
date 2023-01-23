@@ -26,38 +26,35 @@ On doit pouvoir paramétrer le slider pour:
 - Test unitaires mais aussi behat (notamment gérer le mode responsif avec Galen)
 
 ### Todos, Bugs & Issues
-- Problème de deletion de slide:
-> #### Reproduction :
->> 1. Ajouter un block ENVF Slider
->> 2. Le configurer.
->> 3. Ajouter 1 ou 2 slides.
->> 4. Cliquer sur "Save changes".
->> 5. Re-configurer le block.
->> 6. Cliquer sur "Delete slide n°x".
-> #### Résultat :
->> La configuration du block est invalide puisqu'on y trouve 2 ids et 2 valeurs pour whitetext
-> #### Cause :
->> Lors de l'appel à `formslib::exportValues()` l'attribut `_elements` du formulaire contient toujours les champs supprimés.
-> #### Travail à faire
->> Comprendre pourquoi ce problème et mettre à jour la méthode `block_envf_slider_edit_form::delete_slide()` pour que les éléments supprimés du formulaire ne soient pas passés à `formslib::exportValues()`
+
+#### La deletion des slides ne supprime pas vraiment :
+
+###### Reproduction :
+> 1. Ajouter un block ENVF Slider
+> 2. Le configurer.
+> 3. Ajouter 1 ou 2 slides.
+> 4. Cliquer sur "Save changes".
+> 5. Re-configurer le block.
+> 6. Cliquer sur "Delete slide n°x".
+ 
+###### Résultat
+> Il n'y a que l'image qui est supprimée 
+
+###### Cause
 > 
->*cf. Todos dans `block_envf_slider_edit_form::set_data`*
-- **!! Résolu !!** Ids de slides à leur création toujours à 0.
-> ## FIXED
-> #### Reproduction :
->> 1. Ajouter un block ENVF Slider
->> 2. Le configurer.
->> 3. Ajouter plusieurs slides.
-> #### Résultat :
->> Les champs `hidden` `config_slide_id` de toutes les slides ont une valeur égale à 0. 
-> #### Cause :
->> Lors de l'appel à `MoodleQuickForm::createElement` dans `block_envf_slider_edit_form::add_slides_elements()` pour créer le champ
-> `config_slide_id` *(cf. l~149-153)*, la valeur est directement initialisée. Or cette méthode est appelée avant que la slide précédente ait pu être enregistrée.
-> La méthode `get_current_repeats` retourne donc la même valeur que pour la slide précédente puisque la configuration du bloc n'a pas changé.  
+
+#### L'ajout d'une slide après deletion est problématique
+> 1. Ajouter un block ENVF Slider
+> 2. Le configurer.
+> 3. Ajouter 1 ou 2 slides.
+> 4. En supprimer 1
+> 5. rajouter une slide
+
+###### Résultat
+>La slide supprimée est restaurée sans l'image (s'il y en avait une) et une slide a été rajoutée en plus.
+
+###### Cause
 >
-> #### Travail à faire:
-> Mettre à jour la méthode `block_envf_slider_edit_form::get_current_repeats` pour qu'elle prenne en compte l'état actuel du formulaire et non du bloc.
->
->*cf. Todos dans `block_envf_slider_edit_form::add_slides_elements()`*
-- Remplacer le champ white text par un color picker ?
-- Utilisation de générateur dans les tests behat ?
+
+###### Travail à faire
+> Comprendre pourquoi ce problème et mettre à jour la méthode `block_envf_slider_edit_form::delete_slide()` pour que les éléments supprimés du formulaire ne soient pas passés à `formslib::exportValues()`

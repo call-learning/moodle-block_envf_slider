@@ -105,6 +105,9 @@ class block_envf_slider_test extends advanced_testcase {
      * and false if the block's configuration is not.
      *
      * @return void
+     * @param array $config a block's configuration.
+     * @param array $expectedresult whether the given block configuration is valid or not, to check if the method
+     * {@see block_envf_slider::config_is_valid()} returns the right value.
      * @covers \block_envf_slider::config_is_valid
      * @dataProvider config_provider
      */
@@ -113,7 +116,11 @@ class block_envf_slider_test extends advanced_testcase {
     }
 
     /**
+     * Tests the preg match expression to retrieve all the block configuration fields that relates to slides.
+     *
      * @return void
+     * @param string $string a string to test the pregmatch expression.
+     * @param bool $expectedoutput wether or not the string should be recognized by the preg_match expression.
      * @covers \block_envf_slider\block_envf_slider_edit_form::delete_slide()
      * @dataProvider preg_match_provider
      */
@@ -223,6 +230,11 @@ class block_envf_slider_test extends advanced_testcase {
         ];
     }
 
+    /**
+     * Provider used to test the <pre>preg_match</pre> expression in {@see self::test_pregmatch_for_config_fields_in_editform()}.
+     *
+     * @return array[]
+     */
     public function preg_match_provider() {
         return [
             "valid1" => [ "slide_something", true ],
