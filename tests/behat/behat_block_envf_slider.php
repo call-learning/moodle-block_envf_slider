@@ -61,21 +61,23 @@ class behat_block_envf_slider extends behat_base {
     }
 
     /**
-     * @Then the checkbox :checkbox should be checked
-     */
-    public function the_checkbox_should_be_checked($checkbox) {
-        $this->assertSession()->checkboxChecked($checkbox);
-    }
-
-    /**
+     * Checks the value of a given field.
+     *
      * @Then the field :field should be set to :value
+     * @param string $field the field we want to check the value.
+     * @param string $value the value we want the field to be set to.
      */
     public function the_field_should_be_set_to($field, $value) {
         $this->assertSession()->fieldValueEquals($field, $value);
     }
 
     /**
-     * @Then I should see the image :image in the :blocktitle block
+     * Checks wether an image is displayed into an envf slider block.
+     *
+     * @Then I should see the image :image in the :blocktitle envf slider block
+     * @param string $image the path of the image that we want to check if it is displayed.
+     * @param string $blocktitle the title of the EVNF slider block in wich we will search using the
+     * {@see self::get_block_by_title()} method.
      */
     public function i_should_see_the_image_in_the_block($image, $blocktitle) {
         // Find the block element using its title.

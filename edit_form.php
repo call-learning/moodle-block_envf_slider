@@ -22,8 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use block_envf_slider\form\delete_slide_form;
-
 /**
  * Class block_envf_slider_edit_form
  *
@@ -98,8 +96,12 @@ class block_envf_slider_edit_form extends block_edit_form {
      * Get number of repeats
      */
     protected function get_current_repeats() {
-        $repeats = $this->mform->getElement('slides_repeats');
-        return $repeats instanceof HTML_QuickForm_Error ? 0 : $repeats->getValue();
+        $repeats = $this->optional_param(
+            "slides_repeat",
+            isset($this->block->config->slide_id) ? count($this->block->config->slide_id) : 0,
+            PARAM_INT
+        );
+        return $repeats;
     }
 
     /**
@@ -121,7 +123,8 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @throws coding_exception
      */
     protected function specific_definition($mform) {
-        $this->mform = $mform;
+        $this->mform =& $mform;
+        $mform->createElement('hidden', 'slides_repeat', $this->get_current_repeats());
         // Gets all the slides previously added.
         $this->add_slides_elements();
     }
@@ -141,8 +144,8 @@ class block_envf_slider_edit_form extends block_edit_form {
      */
     private function add_slides_elements() {
         $mform =& $this->mform;
-        $repeatarray = array();
-        $repeatedoptions = array();
+        $repeatarray = [];
+        $repeatedoptions = [];
 
         $numberofslides = $this->get_current_repeats();
         $repeatarray[] = $mform->createElement(
@@ -205,8 +208,8 @@ class block_envf_slider_edit_form extends block_edit_form {
         $mform =& $this->mform;
         if (is_int($slideindex)) {
             if (isset($this->block->config->slide_id[$slideindex])) {
-                $slidenumber = $this->get_current_repeats();
-                for ($i = $slideindex + 1; $i < $slidenumber; $i++) {
+                $numberofslides = $this->get_current_repeats();
+                for ($i = $slideindex + 1; $i < $numberofslides; $i++) {
                     // Setting new id values for all the slides that comes after the one we're deleting.
                     $newid = $this->block->config->slide_id[$i] - 1;
                     $this->block->config->slide_id[$i] = $newid;
@@ -227,7 +230,7 @@ class block_envf_slider_edit_form extends block_edit_form {
                     }
                 }
                 $mform->removeElement("config_slide_delete[$slideindex]");
-                $mform->getElement("slides_repeats")->setValue($slidenumber - 1);
+                $mform->getElement("slides_repeats")->setValue($numberofslides - 1);
             }
             $mform->_elements = array_values($mform->_elements);
         } else {

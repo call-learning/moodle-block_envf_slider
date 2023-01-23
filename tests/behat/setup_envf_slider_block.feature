@@ -45,5 +45,5 @@ Feature: Adding and configuring ENVF slider block
     And I should see "Test title 2" in the "ENVF Slider" block
     And I should see "Test description 1" in the "ENVF Slider" block
     And I should see "Test description 2" in the "ENVF Slider" block
-    And I should see the image "stonks.jpg" in the "ENVF Slider" block
-    And I should see the image "phpstormlogo.png" in the "ENVF Slider" block
+    And I should see the image "stonks.jpg" in the "ENVF Slider" envf slider block
+    And I should see the image "phpstormlogo.png" in the "ENVF Slider" envf slider block
