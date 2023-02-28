@@ -45,6 +45,22 @@ class block_envf_slider_edit_form extends block_edit_form {
      */
     public function set_data($defaults) {
         parent::set_data($defaults);
+        $newdata = new stdClass();
+        $optionalparamarray = optional_param_array('config_slide_delete', [], PARAM_RAW);
+        if (count($optionalparamarray) > 0) {
+            foreach (array_keys($optionalparamarray) as $slideindex) {
+                foreach (array_keys($this->get_repeated_elements()) as $elementname) {
+                    if ($elementname == 'slide_delete') {
+                        continue;
+                    }
+                    $configvalues = $defaults->{'config_' . $elementname};
+                    $newdata->{'config_' . $elementname} = $defaults->{'config_' . $elementname};
+                    unset($configvalues[$slideindex]);
+                    $configvalues = array_values($configvalues);
+                    $newdata->{'config_' . $elementname} = $configvalues;
+                }
+            }
+        }
         // Restore filemanager fields.
         // This is a bit of a hack working around the issues of the block.
         // When using set_data, we set the file data to the real file as it reads it
@@ -52,11 +68,10 @@ class block_envf_slider_edit_form extends block_edit_form {
         // not the draft manager file. This can be rectified by a second call to set_data.
         // We try to get the previously submitted file.
         if (!empty($this->block->config) && is_object($this->block->config)) {
-            $filefields = new stdClass();
             $numthumbnails = $this->get_current_repeats();
             for ($index = 0; $index < $numthumbnails; $index++) {
                 $fieldname = 'config_slide_image';
-                $filefields->{$fieldname}[$index] = array();
+                $newdata->{$fieldname}[$index] = array();
                 // Here we could try to use the file_get_submitted_draft_itemid, but it expects to have an itemid defined
                 // Which is not what we have right now, we just have a flat list.
                 $param = optional_param_array($fieldname, [], PARAM_INT);
@@ -72,26 +87,59 @@ class block_envf_slider_edit_form extends block_edit_form {
                     $index,
                     $this->get_file_manager_options());
 
-                $filefields->{$fieldname}[$index] = $draftitemid;
+                $newdata->{$fieldname}[$index] = $draftitemid;
             }
-
-            moodleform::set_data($filefields);
-
-            // Todo moodleform::getData returns wrong config values with 2ids and whitetext instead of 1.
-            // To reproduce : create 2 slides, save changes & delete one slide.
-            // Todo find another way to do this.
-            // Force saving the configuration but this makes us unable to cancel or undo changes.
-            $this->block->instance_config_save($this->block->config);
         }
-        if ($this->no_submit_button_pressed()) {
-            $optionalparamarray = optional_param_array('config_slide_delete', [], PARAM_RAW);
-            if (count($optionalparamarray) > 0) {
-                $optionalparam = array_shift($optionalparamarray);
-                $slidetodelete = explode('°', $optionalparam)[1];
-                $newfields = $this->delete_slide(intval($slidetodelete) - 1);
-            }
-            moodleform::set_data($newfields);
-        }
+        moodleform::set_data($newdata);
+    }
+
+    /**
+     * Get all repeated elements to add to the form
+     *
+     * @return array[]
+     * @throws coding_exception
+     */
+    private function get_repeated_elements() {
+        $numberofslides = $this->get_current_repeats();
+        return [
+            'slide_id' => [
+                PARAM_INT,
+                'hidden',
+                "config_slide_id",
+                $numberofslides
+            ],
+            'slide_title' => [
+                PARAM_TEXT,
+                'text',
+                'config_slide_title',
+                get_string('config:slidetitle', 'block_envf_slider')
+            ],
+            'slide_description' => [
+                PARAM_TEXT,
+                'text',
+                get_string('config:slidetitle', 'block_envf_slider')
+            ],
+            'slide_whitetext' => [
+                PARAM_BOOL,
+                'advcheckbox',
+                get_string('config:whitetext', 'block_envf_slider'),
+                '',
+                null
+            ],
+            'slide_image' => [
+                PARAM_RAW,
+                'filemanager',
+                get_string('config:slideimage', 'block_envf_slider'),
+                null,
+                $this->get_file_manager_options()
+            ],
+            'slide_delete' => [
+                PARAM_RAW,
+                'submit',
+                get_string('config:deleteslide', 'block_envf_slider')
+            ]
+
+        ];
     }
 
     /**
@@ -119,6 +167,28 @@ class block_envf_slider_edit_form extends block_edit_form {
     }
 
     /**
+     * Return submitted data if properly submitted or returns NULL if validation fails or
+     * if there is no submitted data.
+     *
+     * @return object submitted data; NULL if not valid or not submitted or cancelled
+     */
+    public function get_data() {
+        $data = parent::get_data();
+        if (!empty($data)) {
+            foreach (array_keys($data->config_slide_delete) as $slideindex) {
+                foreach (array_keys($this->get_repeated_elements()) as $elementname) {
+                    if ($elementname == 'slide_delete') {
+                        continue;
+                    }
+                    unset($data->{'config_' . $elementname}[$slideindex]);
+                    $data->{'config_' . $elementname} = array_values($data->{'config_' . $elementname});
+                }
+            }
+        }
+        return $data;
+    }
+
+    /**
      * Form definition
      *
      * @param MoodleQuickForm $mform The formulary used.
@@ -131,19 +201,6 @@ class block_envf_slider_edit_form extends block_edit_form {
         $this->add_slides_elements();
     }
 
-    /*
-    public function definition_after_data() {
-        if ($this->no_submit_button_pressed()) {
-            $optionalparamarray = optional_param_array('config_slide_delete', [], PARAM_RAW);
-            if (count($optionalparamarray) > 0) {
-                $optionalparam = array_shift($optionalparamarray);
-                $slidetodelete = explode('°', $optionalparam)[1];
-                $newfields = $this->delete_slide(intval($slidetodelete) - 1);
-            }
-        }
-    }
-    */
-
     /**
      * A method that add slide elements to the form.
      *
@@ -155,52 +212,18 @@ class block_envf_slider_edit_form extends block_edit_form {
      *      "image": "image of the slide"
      * }
      * </pre>
+     *
      * @return void
      */
     private function add_slides_elements() {
         $repeatarray = [];
         $repeatedoptions = [];
 
-        $numberofslides = $this->get_current_repeats();
-        $repeatarray[] = $this->mform->createElement(
-            'hidden',
-            "config_slide_id",
-            $numberofslides
-        );
-        $repeatedoptions['config_slide_id']['type'] = PARAM_INT;
-
-        $repeatarray[] = $this->mform->createElement('text', 'config_slide_title',
-            get_string('config:slidetitle', 'block_envf_slider'));
-        $repeatedoptions['config_slide_title']['type'] = PARAM_TEXT;
-
-        $repeatarray[] = $this->mform->createElement('text', 'config_slide_description',
-            get_string('config:slidedescription', 'block_envf_slider'));
-        $repeatedoptions['config_slide_description']['type'] = PARAM_TEXT;
-
-        $repeatarray[] = $this->mform->createElement(
-            'advcheckbox',
-            'config_slide_whitetext',
-            get_string('config:whitetext', 'block_envf_slider'),
-            '',
-            null,
-            [false, true]
-        );
-        $repeatedoptions['config_slide_whitetext']['type'] = PARAM_BOOL;
-
-        $repeatarray[] = $this->mform->createElement(
-            'filemanager',
-            'config_slide_image',
-            get_string('config:slideimage', 'block_envf_slider'),
-            null,
-            $this->get_file_manager_options()
-        );
-        $repeatedoptions['config_slide_image']['type'] = PARAM_RAW;
-
-        // The Delete Slide button.
-        $repeatarray[] = $this->mform->createElement('submit', 'config_slide_delete',
-            get_string('config:deleteslide', 'block_envf_slider'));
-        $repeatedoptions['config_slide_delete']['type'] = PARAM_RAW;
-        $this->mform->registerNoSubmitButton("config_slide_delete");
+        foreach ($this->get_repeated_elements() as $key => $values) {
+            $repeatedoptions["config_$key"]['type'] = array_shift($values);
+            array_splice($values, 1, 0, "config_$key");
+            $repeatarray[] = $this->mform->createElement(...$values);
+        }
         $this->repeat_elements($repeatarray, $this->get_current_repeats(),
             $repeatedoptions,
             'slides_repeats',
@@ -209,7 +232,6 @@ class block_envf_slider_edit_form extends block_edit_form {
             get_string('config:addmoreslides', 'block_envf_slider'),
             true
         );
-
     }
 
     /**
@@ -243,62 +265,4 @@ class block_envf_slider_edit_form extends block_edit_form {
         $this->mform->getElement("slides_repeats")->setValue($numberofslides - 1);
         return $return;
     }
-
-
-    /*
-     * Here is an old version of delete_slide function but it is not functionnal
-     *
-     * if (is_int($slideindex)) {
-            if (isset($this->block->config->slide_id[$slideindex])) {
-                $numberofslides = $this->get_current_repeats();
-                for ($i = $slideindex + 1; $i < $numberofslides; $i++) {
-                    // Setting new id values for all the slides that comes after the one we're deleting.
-                    // In block's config.
-                    $newid = $this->block->config->slide_id[$i] - 1;
-                    $this->block->config->slide_id[$i] = $newid;
-                    // In the moodle form.
-                    $idelement = $this->mform->getElement("config_slide_id[$i]");
-                    $idelement->setValue($newid);
-                }
-                foreach ($this->block->config as $configfieldname => $configfieldvalue) {
-                    if (preg_match('/^slide_\S+/', $configfieldname)) {
-                        $elementname = "config_{$configfieldname}[$slideindex]";
-                        $deletedelt = $this->mform->removeElement($elementname);
-
-                        // TODO during the loop in formslib::exportValues,
-                        // $this->_elements contains values as set as we didn't deleted the slide.
-                        // Even with these 3 unset calls and the previous removeElement call.
-                        unset($this->mform->_elements[$this->mform->_elementIndex[$elementname]]);
-                        unset($this->mform->_elementIndex[$elementname]);
-                        unset($this->block->config->{$configfieldname}[$slideindex]);
-                    }
-                }
-                $this->mform->removeElement("config_slide_delete[$slideindex]");
-
-                $this->mform->getElement("slides_repeats")->setValue($numberofslides - 1);
-            }
-            // Reindexing form attributes after delete.
-            $this->mform->_elements = array_values($this->mform->_elements);
-        } else {
-            debugging("Warning ! Wrong value '$slideindex' passed to slideindex in block_envf_slider::delete_slide(int) method.");
-        }
-        // Reindex and submit to the form.
-        if ($this->block->config) {
-            return [
-                'config_slide_id' => array_values($this->block->config->slide_id),
-                'config_slide_title' => array_values($this->block->config->slide_title),
-                'config_slide_description' => array_values($this->block->config->slide_description),
-                'config_slide_image' => array_values($this->block->config->slide_image),
-            ];
-        } else {
-            return [
-                'config_slide_id' => [],
-                'config_slide_title' => [],
-                'config_slide_description' => [],
-                'config_slide_image' => []
-            ];
-        }
-
-     *
-     */
 }
