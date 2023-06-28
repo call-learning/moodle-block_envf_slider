@@ -23,13 +23,18 @@
  */
 
 $string['pluginname'] = 'ENVF Slider';
+$string['slidesection'] = 'Slides';
 $string['config:addnewslide'] = 'Add a new slide';
 $string['config:slidetitle'] = 'Title slide {no}';
 $string['config:slidedescription'] = 'Description slide {no}';
 $string['config:slideimage'] = 'Image slide {no}';
 $string['config:whitetext'] = 'White text for slide {no} ?';
-$string['config:deleteslide'] = "Delete slide n°{no}";
+$string['config:deleteslide'] = "Delete slide {no}";
 $string['config:addmoreslides'] = "Add more slides";
+$string['config:maxheight'] = "Max slider height in pixels";
+$string['config:timer'] = "Slide timing in microseconds";
 $string['envf_slider:addinstance'] = 'Add a new ENVF Slider block';
 $string['envf_slider:myaddinstance'] = 'Add a new ENVF Slider block to Dashboard';
+$string['general'] = 'General';
 $string['invalidconfig'] = "It looks like your block configuration is invalid.<br>Make sure you did not lay some empty fields.";
+

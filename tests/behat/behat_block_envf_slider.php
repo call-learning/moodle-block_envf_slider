@@ -36,31 +36,6 @@ use Behat\Mink\Element\NodeElement;
 class behat_block_envf_slider extends behat_base {
 
     /**
-     * Search for a certain text displaying in the specified block.
-     * The block is specified by its name.
-     *
-     * In order to search it, we use {@see \Behat\Mink\Element\Element::getText()} method to get all the text that a block contains
-     * and {@see strpos()} method to find the researched text inside.
-     *
-     * @param string $text the text to search in the block.
-     * @param string $blocktitle The title of the block in wich we want to find the text.
-     * @throws Exception If the text is not found. Note that the {@see behat_block_envf_slider::get_block_by_title()} method will
-     * also throw an exception if the specified block doesn't exist.
-     * @Then I should see :text in the :blocktitle block
-     */
-    public function i_should_see_in_the_block($text, $blocktitle) {
-        // Find the block element using its title.
-        $blockelement = $this->get_block_by_title($blocktitle);
-
-        // Get all the text inside the block.
-        $blockhtml = $blockelement->getHtml();
-
-        if (!strpos($blockhtml, $text)) {
-            throw new Exception("Text '$text' not found in the block with title '$blocktitle'.");
-        }
-    }
-
-    /**
      * Checks the value of a given field.
      *
      * @Then the field :field should be set to :value

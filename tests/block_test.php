@@ -24,11 +24,11 @@
 
 namespace block_envf_slider;
 
+use base_testcase;
 use block_envf_slider\output\block;
 use block_envf_slider\output\renderer;
 use block_envf_slider\output\slide;
 use moodle_page;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the block_envf_slider's block.
@@ -36,7 +36,7 @@ use PHPUnit\Framework\TestCase;
  * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_test extends TestCase {
+class block_test extends base_testcase {
 
     /**
      * Tests if the {@see block::export_for_template()} method works well by checking if the value returned is exploitable
@@ -49,10 +49,10 @@ class block_test extends TestCase {
         $slides = [];
         $maxindex = 5;
         for ($i = 0; $i < $maxindex; $i++) {
-            $slides[] = slide::init_dummy_slide();
+            $slides[] = new slide(0, '', '', new \moodle_url('/'));
         }
         $block = new block($slides);
         $data = $block->export_for_template(new renderer(new moodle_page(), null));
-        self::assertEquals($maxindex, count($data["slides"]));
+        $this->assertEquals($maxindex, count($data["slides"]));
     }
 }

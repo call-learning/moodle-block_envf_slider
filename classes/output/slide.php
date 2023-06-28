@@ -25,9 +25,7 @@
 namespace block_envf_slider\output;
 
 use block_envf_slider;
-use moodle_exception;
 use moodle_url;
-use ReflectionClass;
 use renderable;
 use renderer_base;
 use templatable;
@@ -40,60 +38,36 @@ use templatable;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class slide implements renderable, templatable {
-
-    /**
-     * A constant to represent the correct path to the slide class and avoid human errors.
-     */
-    const SLIDECLASSNAME = "block_envf_slider\output\slide";
-
-    /** @var int $id The id of the slide. */
-    public $id;
+    /** @var int $index The index of the slide. */
+    protected $index;
 
     /** @var string $title The title of the slide. */
-    public $title;
+    protected $title;
 
     /** @var string $description The description of the slide. */
-    public $description;
+    protected $description;
 
     /** @var moodle_url $image The url of the background image of the slide. */
-    public $image;
+    protected $image;
 
     /** @var bool $whitetext A booleab telling whether the text has to be white. */
-    public $whitetext;
+    protected $whitetext;
 
     /**
      * Constructor for a slide.
      *
-     * @param int $id The id of the slide.
+     * @param int $index Index for the slide
      * @param string $title The title of the slide.
      * @param string $description The discription of the slide.
-     * @param moodle_url $image The image url of the slide.
+     * @param moodle_url|null $image The image url of the slide.
      * @param bool $whitetext whether the text has to be dsplayed in white or not.
      */
-    public function __construct($id, $title, $description, $image, $whitetext=false) {
-        $this->id = $id;
+    public function __construct(int $index, string $title, string $description, ?moodle_url $image, bool $whitetext = false) {
+        $this->index = $index;
         $this->title = $title;
         $this->description = $description;
         $this->image = $image;
         $this->whitetext = $whitetext;
-    }
-
-    /**
-     * Creates a slide from an array of properties.
-     *
-     * @param array $array an array of slide properties.
-     * @return slide A slide create with the array's properties.
-     */
-    public static function create_from_array($array): slide {
-        $classproperties = array_keys(get_class_vars(self::SLIDECLASSNAME));
-        if (count($array) !== count($classproperties)) {
-            throw new moodle_exception(
-                "Error creating a slide from an array, expected ".count($classproperties).
-                " values, got ".count($array)."."
-            );
-        }
-        $reflector = new ReflectionClass(self::SLIDECLASSNAME);
-        return $reflector->newInstanceArgs($array);
     }
 
     /**
@@ -103,27 +77,13 @@ class slide implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        $data = [];
-        foreach ($this as $property => $value) {
-            $data[$property] = $value;
-        }
+        $data = [
+            'index' => $this->index,
+            'title' => $this->title,
+            'description' => $this->description,
+            'whitetext' => $this->whitetext,
+        ];
+        $data['image'] = !empty($this->image) ? $this->image->out(true) : false;
         return $data;
     }
-
-    /**
-     * A method to initialize a slide with dummy properties.
-     * The slide class being made the way that of its properties are in complete abstraction, we will use the
-     * {@see slide::create_from_array()} method to create a slide with as property values the name of these properties.
-     *
-     * Note that all the properties get a string as value. We've made it this way to be compatible with older version than php 8.x.
-     * When we'll start to type our properties, we'll have to use the {@see \ReflectionType} class to provide correct values to
-     * the slide object.
-     *
-     * @return slide A slide object with dummy properties.
-     */
-    public static function init_dummy_slide(): slide {
-        $properties = array_keys(get_class_vars(self::SLIDECLASSNAME));
-        return self::create_from_array($properties);
-    }
-
 }

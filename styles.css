@@ -40,10 +40,6 @@
     z-index: 10;
 }
 
-.block-envf-slider .text-container {
-    padding-top: 20%;
-}
-
 .block-envf-slider .glide,
 .block-envf-slider .glide__slides,
 .block-envf-slider .glide__track,
@@ -53,5 +49,6 @@
 
 .block-envf-slider .slide-content {
     background-size: cover;
-    padding: 10%;
+    background-position: center;
+    padding: 2em;
 }

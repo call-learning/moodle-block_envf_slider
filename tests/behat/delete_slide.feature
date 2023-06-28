@@ -6,6 +6,7 @@ Feature: Adding and deleting slides in ENVF slider block
 
   Background:
     Given I log in as "admin"
+    And I am on site homepage
     And I turn editing mode on
     And I add the "ENVF Slider" block
     And I configure the "ENVF Slider" block
@@ -22,21 +23,19 @@ Feature: Adding and deleting slides in ENVF slider block
     And I set the field "Title slide 2" to "Test title 2"
     And I set the field "Description slide 2" to "Test description 2"
     And I upload "blocks/envf_slider/tests/fixtures/openclipart-342997.png" file to "Image slide 2" filemanager
+    And I press "Save changes"
 
-    When I click on "<delete_slide_button_name>" "button"
+    Then I configure the "ENVF Slider" block
+    And I click on "<delete_slide_button_name>" "button"
 
-    Then I should see "Title slide 1"
-    And I should see "Description slide 1"
-    And I should see "White text for slide 1 ?"
+    Then I should see "Test title <remaining_slide_number>" in the "ENVF Slider" "block"
+    And I should see "Test description <remaining_slide_number>" in the "ENVF Slider" "block"
 
-    And I should not see "Title slide 2"
-    And I should not see "Description slide 2"
-    And I should not see "White text for slide 2 ?"
-
+    Then I configure the "ENVF Slider" block
     And the field "Title slide 1" should be set to "Test title <remaining_slide_number>"
     And the field "Description slide 1" should be set to "Test description <remaining_slide_number>"
 
     Examples:
-    | delete_slide_button_name | remaining_slide_number |
-    | config_slide_delete[1]   | 1                      |
-    | config_slide_delete[0]   | 2                      |
+      | delete_slide_button_name | remaining_slide_number |
+      | Delete slide 2           | 1                      |
+      | Delete slide 1           | 2                      |

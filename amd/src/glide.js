@@ -16,18 +16,18 @@ define(['jquery', 'block_envf_slider/config'], function($) {
             let forward = document.querySelector('#arrow-right');
             let backward = document.querySelector('#arrow-left');
 
-            forward.addEventListener('click', function () {
+            forward.addEventListener('click', function() {
                 glide.go('>');
             });
-            backward.addEventListener('click', function () {
+            backward.addEventListener('click', function() {
                 glide.go('<');
             });
 
             let footeritems = document.getElementsByClassName('slidefooter-item');
 
-            for(let i = 0; i < footeritems.length; i++){
+            for (let i = 0; i < footeritems.length; i++) {
                 var footeritem = footeritems[i];
-                footeritem.addEventListener('click', function () {
+                footeritem.addEventListener('click', function() {
                     glide.go('=' + i.toString());
                 });
             }

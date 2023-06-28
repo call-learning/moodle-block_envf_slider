@@ -13,14 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Edit Form
- *
- * @package    block_envf_slider
- * @copyright 2022 - CALL Learning - Martin CORNU-MANSUY <martin@call-learning.fr>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+use block_envf_slider\output\block;
 
 /**
  * Class block_envf_slider_edit_form
@@ -31,12 +24,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_envf_slider_edit_form extends block_edit_form {
-
     /**
-     * @var MoodleQuickForm $mform the formulary object passed in {@see block_envf_slider_edit_form::specific_definition()}
-     * to be able to get it int the method {@see block_envf_slider_edit_form::add_slide()}
+     * Number of elements to repeat
      */
-    private $mform;
+    const REPEAT_HIDDEN_ELEMENT = 'slides_repeats';
 
     /**
      * Set for data and retrieve images from config
@@ -45,7 +36,9 @@ class block_envf_slider_edit_form extends block_edit_form {
      */
     public function set_data($defaults) {
         parent::set_data($defaults);
-        $newdata = new stdClass();
+        $newdata = (object) [
+            'config_count' => $defaults->config_count ?? 0,
+        ];
         $optionalparamarray = optional_param_array('config_slide_delete', [], PARAM_RAW);
         if (count($optionalparamarray) > 0) {
             foreach (array_keys($optionalparamarray) as $slideindex) {
@@ -53,12 +46,13 @@ class block_envf_slider_edit_form extends block_edit_form {
                     if ($elementname == 'slide_delete') {
                         continue;
                     }
-                    $configvalues = $defaults->{'config_' . $elementname};
-                    $newdata->{'config_' . $elementname} = $defaults->{'config_' . $elementname};
+                    $confignfieldame = 'config_' . $elementname;
+                    $configvalues = $defaults->$confignfieldame;
                     unset($configvalues[$slideindex]);
                     $configvalues = array_values($configvalues);
-                    $newdata->{'config_' . $elementname} = $configvalues;
+                    $newdata->$confignfieldame = $configvalues;
                 }
+                $newdata->config_count--;
             }
         }
         // Restore filemanager fields.
@@ -68,13 +62,13 @@ class block_envf_slider_edit_form extends block_edit_form {
         // not the draft manager file. This can be rectified by a second call to set_data.
         // We try to get the previously submitted file.
         if (!empty($this->block->config) && is_object($this->block->config)) {
-            $numthumbnails = $this->get_current_repeats();
+            $numthumbnails = $newdata->config_count ?? 0;
             for ($index = 0; $index < $numthumbnails; $index++) {
-                $fieldname = 'config_slide_image';
-                $newdata->{$fieldname}[$index] = array();
+                $imagefieldname = 'config_slide_image';
+                $newdata->{$imagefieldname}[$index] = array();
                 // Here we could try to use the file_get_submitted_draft_itemid, but it expects to have an itemid defined
                 // Which is not what we have right now, we just have a flat list.
-                $param = optional_param_array($fieldname, [], PARAM_INT);
+                $param = optional_param_array($imagefieldname, [], PARAM_INT);
                 if (!empty($param[$index])) {
                     $draftitemid = $param[$index];
                 } else {
@@ -87,7 +81,7 @@ class block_envf_slider_edit_form extends block_edit_form {
                     $index,
                     $this->get_file_manager_options());
 
-                $newdata->{$fieldname}[$index] = $draftitemid;
+                $newdata->{$imagefieldname}[$index] = $draftitemid;
             }
         }
         moodleform::set_data($newdata);
@@ -100,24 +94,16 @@ class block_envf_slider_edit_form extends block_edit_form {
      * @throws coding_exception
      */
     private function get_repeated_elements() {
-        $numberofslides = $this->get_current_repeats();
         return [
-            'slide_id' => [
-                PARAM_INT,
-                'hidden',
-                "config_slide_id",
-                $numberofslides
-            ],
             'slide_title' => [
                 PARAM_TEXT,
                 'text',
-                'config_slide_title',
                 get_string('config:slidetitle', 'block_envf_slider')
             ],
             'slide_description' => [
-                PARAM_TEXT,
-                'text',
-                get_string('config:slidetitle', 'block_envf_slider')
+                PARAM_CLEANHTML,
+                'editor',
+                get_string('config:slidedescription', 'block_envf_slider')
             ],
             'slide_whitetext' => [
                 PARAM_BOOL,
@@ -143,24 +129,12 @@ class block_envf_slider_edit_form extends block_edit_form {
     }
 
     /**
-     * Get number of repeats
-     */
-    protected function get_current_repeats() {
-        $repeats = $this->optional_param(
-            "slides_repeats",
-            isset($this->block->config->slide_id) ? count($this->block->config->slide_id) : 0,
-            PARAM_INT
-        );
-        return $repeats;
-    }
-
-    /**
      * Get usual options for filemanager
      *
      * @return array
      */
     protected function get_file_manager_options(): array {
-        return array('subdirs' => 0,
+        return array('subdirs' => false,
             'maxbytes' => FILE_AREA_MAX_BYTES_UNLIMITED,
             'maxfiles' => 1,
             'context' => $this->block->context);
@@ -175,94 +149,97 @@ class block_envf_slider_edit_form extends block_edit_form {
     public function get_data() {
         $data = parent::get_data();
         if (!empty($data)) {
+            $data->config_count = $data->{self::REPEAT_HIDDEN_ELEMENT} ?? 0;
+        }
+        if (!empty($data->config_slide_delete)) {
             foreach (array_keys($data->config_slide_delete) as $slideindex) {
-                foreach (array_keys($this->get_repeated_elements()) as $elementname) {
-                    if ($elementname == 'slide_delete') {
-                        continue;
-                    }
-                    unset($data->{'config_' . $elementname}[$slideindex]);
-                    $data->{'config_' . $elementname} = array_values($data->{'config_' . $elementname});
-                }
+                $this->delete_slide($slideindex, $data);
             }
         }
         return $data;
     }
 
     /**
-     * Form definition
+     * Todo: complete phpdoc.
      *
-     * @param MoodleQuickForm $mform The formulary used.
-     * @throws coding_exception
+     * @param int $slideindex
+     * @param object $data
+     * @return void
      */
-    protected function specific_definition($mform) {
-        $this->mform =& $mform;
-        $mform->createElement('hidden', 'slides_repeat', $this->get_current_repeats());
-        // Gets all the slides previously added.
-        $this->add_slides_elements();
+    private function delete_slide(int $slideindex, object &$data) {
+        $data->config_count--;
+        foreach ($this->get_repeated_elements() as $key => $element) {
+            if (isset(($data->{'config_' . $key})[$slideindex])) {
+                unset(($data->{'config_' . $key})[$slideindex]);
+                $data->{'config_' . $key} = array_values($data->{'config_' . $key});
+            }
+        }
     }
 
     /**
-     * A method that add slide elements to the form.
+     * Form definition
      *
      * <pre>
      * "slide": {
-     *      "id": 0,
      *      "title": "Title of the slide",
      *      "description": "Description of the slide",
-     *      "image": "image of the slide"
+     *      "image": imageID of the slide
      * }
      * </pre>
      *
+     * @param MoodleQuickForm $mform The formulary used.
      * @return void
+     * @throws coding_exception
      */
-    private function add_slides_elements() {
+    protected function specific_definition($mform) {
+        // Slide section.
         $repeatarray = [];
         $repeatedoptions = [];
+        $mform->addElement('header', 'slides', get_string('slidesection', 'block_envf_slider'));
 
         foreach ($this->get_repeated_elements() as $key => $values) {
             $repeatedoptions["config_$key"]['type'] = array_shift($values);
+            // Insert the name of the field in the second element.
             array_splice($values, 1, 0, "config_$key");
-            $repeatarray[] = $this->mform->createElement(...$values);
+            $repeatarray[] = $mform->createElement(...$values);
         }
         $this->repeat_elements($repeatarray, $this->get_current_repeats(),
             $repeatedoptions,
-            'slides_repeats',
+            self::REPEAT_HIDDEN_ELEMENT,
             'slides_add_fields',
             1,
             get_string('config:addmoreslides', 'block_envf_slider'),
             true
         );
+        $mform->addElement('header', 'general', get_string('general', 'block_envf_slider'));
+
+        $mform->addElement('text',
+            'config_maxheight',
+            get_string('config:maxheight', 'block_envf_slider'),
+            block::DEFAULT_HEIGHT
+        );
+        $mform->setDefault('config_maxheight', block::DEFAULT_HEIGHT);
+        $mform->setType('config_maxheight', PARAM_INT);
+
+        $mform->addElement('text',
+            'config_timer',
+            get_string('config:timer', 'block_envf_slider'),
+            block::DEFAULT_TIMER_AUTOPLAY
+        );
+        $mform->setDefault('config_timer', block::DEFAULT_TIMER_AUTOPLAY);
+        $mform->setType('config_timer', PARAM_INT);
+
     }
 
     /**
-     * Todo: complete phpdoc.
-     *
-     * @param int $slideindex
-     * @return array
+     * Get number of repeats
      */
-    private function delete_slide($slideindex): array {
-        $return = [];
-        if ($this->block->config && block_envf_slider::config_is_valid($this->block->config)) {
-            $numberofslides = $this->get_current_repeats();
-            for ($i = $slideindex + 1; $i < $numberofslides; $i++) {
-                // Setting new id values for all the slides that comes after the one we're deleting.
-                // In block's config.
-                $newid = $this->block->config->slide_id[$i] - 1;
-                $this->block->config->slide_id[$i] = $newid;
-                // In the moodle form.
-                $idelement = $this->mform->getElement("config_slide_id[$i]");
-                $idelement->setValue($newid);
-            }
-            foreach ($this->block->config as $configfieldname => $configfieldvalue) {
-                unset($this->block->config->{$configfieldname}[$slideindex]);
-                if (preg_match('/^slide_\S+/', $configfieldname)) {
-                    $elementname = "config_{$configfieldname}[$slideindex]";
-                    $deletedelt = $this->mform->removeElement($elementname);
-                }
-            }
-            $this->mform->removeElement("config_slide_delete[$slideindex]");
-        }
-        $this->mform->getElement("slides_repeats")->setValue($numberofslides - 1);
-        return $return;
+    protected function get_current_repeats() {
+        $repeats = $this->optional_param(
+            self::REPEAT_HIDDEN_ELEMENT,
+            $this->block->get_slides_count(),
+            PARAM_INT
+        );
+        return $repeats;
     }
 }

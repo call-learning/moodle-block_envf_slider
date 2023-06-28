@@ -1,5 +1,7 @@
 # moodle-block_envf_slider
 
+[![Moodle Plugin CI](https://github.com/call-learning/moodle-block_envf_slider/actions/workflows/main.yml/badge.svg)](https://github.com/call-learning/moodle-block_envf_slider/actions/workflows/main.yml)
+
 ## Specification
 
 ### Contexte et cas d’utilisation

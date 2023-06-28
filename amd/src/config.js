@@ -11,7 +11,7 @@ define(['core/config'], function(cfg) {
                 cfg.wwwroot
                 + '/lib/javascript.php/'
                 + cfg.jsrev
-                + '/blocks/rss_thumbnails/js/glide/dist/glide'
+                + '/blocks/envf_slider/js/glide/dist/glide'
                 + (cfg.developerdebug ? '.min' : ''),
         },
         shim: {

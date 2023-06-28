@@ -36,17 +36,39 @@ use templatable;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block implements renderable, templatable {
+    /**
+     * Default height
+     */
+    const DEFAULT_HEIGHT = 350;
+
+    /**
+     * Default timer autoplay
+     */
+    const DEFAULT_TIMER_AUTOPLAY = 5000;
 
     /** @var array $slides An array of {@see slide} representing the slides the block contains. */
     private $slides;
 
     /**
+     * @var int $maxheight maximum height for the slider
+     */
+    private $maxheight;
+    /**
+     * @var int $timer Time in microseconds to change slides
+     */
+    private $timer;
+
+    /**
      * Constructor for {@see block}.
      *
      * @param array $slides An array of {@see slide} that the block contains.
+     * @param int|null $maxheight Maximum height for the slider
+     * @param int|null $timer Time between slides
      */
-    public function __construct($slides) {
+    public function __construct(array $slides, ?int $maxheight = null, ?int $timer = null) {
         $this->slides = $slides;
+        $this->maxheight = $maxheight ?? self::DEFAULT_HEIGHT;
+        $this->timer = $timer ?? self::DEFAULT_TIMER_AUTOPLAY;
     }
 
     /**
@@ -61,7 +83,10 @@ class block implements renderable, templatable {
             $slides[] = $slide->export_for_template($output);
         }
         return [
-            "slides" => $slides
+            'slides' => $slides,
+            'maxheight' => $this->maxheight,
+            'autoplay' => $this->timer
         ];
     }
 }
+

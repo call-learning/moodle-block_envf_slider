@@ -28,7 +28,6 @@ use advanced_testcase;
 use block_envf_slider;
 use context_system;
 use context_user;
-use core_files_external;
 use moodle_page;
 
 /**
@@ -43,24 +42,21 @@ class block_envf_slider_test extends advanced_testcase {
      * @var block_envf_slider $block an object from the tested class to be used in the tests.
      * It is initialized in the {@see block_envf_slider_test::init()} method.
      */
-    private block_envf_slider $block;
+    private $block;
 
     /**
      * A method to initialize a block to be able to test properly all the {@see block_envf_slider}'s methods.
      *
      * @return void
      */
-    public function init(): void {
+    public function setUp(): void {
         global $CFG;
         $this->resetAfterTest();
         $this->user = $this->getDataGenerator()->create_user();
         $this->setUser($this->user);
-        // Create a Sponsor block.
-        $page = new moodle_page();
-        $page->set_context(context_system::instance());
-        $page->set_pagelayout('frontpage');
+        // Create a ENVF Slider block.
+        $page = $this->create_dummy_page();
         $blockname = 'envf_slider';
-        $page->blocks->load_blocks();
         $page->blocks->add_block_at_end_of_default_region($blockname);
         // Here we need to work around the block API. In order to get 'get_blocks_for_region' to work,
         // we would need to reload the blocks (as it has been added to the DB but is not
@@ -70,10 +66,7 @@ class block_envf_slider_test extends advanced_testcase {
         // Alternatively if birecordsbyregion was nullable,
         // should for example have a load_block + create_all_block_instances and
         // should be able to access to the block.
-        $page = new moodle_page();
-        $page->set_context(context_system::instance());
-        $page->set_pagelayout('frontpage');
-        $page->blocks->load_blocks();
+        $page = $this->create_dummy_page();
         $blocks = $page->blocks->get_blocks_for_region($page->blocks->get_default_region());
         $block = end($blocks);
         $block = block_instance($blockname, $block->instance);
@@ -82,51 +75,25 @@ class block_envf_slider_test extends advanced_testcase {
             $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/pexels-tom-dubois-17088081.jpg",
             $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/openclipart-342997.png"
         ]);
+        // Reload config.
+        $page = $this->create_dummy_page();
+        $blocks = $page->blocks->get_blocks_for_region($page->blocks->get_default_region());
+        $block = end($blocks);
+        $this->block = block_instance($blockname, $block->instance); // Refresh the block.
     }
 
     /**
-     * Tests if the {@see block_envf_slider::get_image_urls()} method returns valid  and useable image urls.
+     * Create a dummy frontpage
      *
-     * @return void
-     * @covers \block_envf_slider::get_image_urls
+     * @return moodle_page
+     * @throws \dml_exception
      */
-    public function test_get_image_urls() {
-        $this->init();
-        $urls = $this->block->get_image_urls();
-        foreach ($urls as $url) {
-            $parts = parse_url($url);
-            $imagepath = $parts['path'];
-            // Todo : Check if the imagepath is valid.
-        }
-    }
-
-    /**
-     * Tests if the {@see block_envf_slider::config_is_valid()} method returns well true if the block's configuration is valid,
-     * and false if the block's configuration is not.
-     *
-     * @return void
-     * @param array $config a block's configuration.
-     * @param array $expectedresult whether the given block configuration is valid or not, to check if the method
-     * {@see block_envf_slider::config_is_valid()} returns the right value.
-     * @covers \block_envf_slider::config_is_valid
-     * @dataProvider config_provider
-     */
-    public function test_config_is_valid($config, $expectedresult) {
-        self::assertEquals($expectedresult, block_envf_slider::config_is_valid($config));
-    }
-
-    /**
-     * Tests the preg match expression to retrieve all the block configuration fields that relates to slides.
-     *
-     * @return void
-     * @param string $string a string to test the pregmatch expression.
-     * @param bool $expectedoutput wether or not the string should be recognized by the preg_match expression.
-     * @covers \block_envf_slider\block_envf_slider_edit_form::delete_slide()
-     * @dataProvider preg_match_provider
-     */
-    public function test_pregmatch_for_config_fields_in_editform($string, $expectedoutput) {
-        $pregexpression = '/^slide_\S+/';
-        self::assertEquals($expectedoutput, (bool) preg_match($pregexpression, $string));
+    private function create_dummy_page() {
+        $page = new moodle_page();
+        $page->set_context(context_system::instance());
+        $page->set_pagelayout('frontpage');
+        $page->blocks->load_blocks();
+        return $page;
     }
 
     /**
@@ -141,7 +108,6 @@ class block_envf_slider_test extends advanced_testcase {
     protected function upload_files_in_block($imagesnames) {
         $usercontext = context_user::instance($this->user->id);
         $configdata = (object) [
-            'slide_id' => [],
             'slide_title' => [],
             'slide_description' => [],
         ];
@@ -165,12 +131,59 @@ class block_envf_slider_test extends advanced_testcase {
                 $filerecord,
                 $filepath
             );
-            $configdata->slide_id[] = $index;
             $configdata->slide_title[] = 'Title ' . $index;
             $configdata->slide_description[] = 'Description' . $index;
             $configdata->slide_image[] = $file->get_itemid();
         }
+        $configdata->slide_count = count($imagesnames);
         $this->block->instance_config_save($configdata);
+    }
+
+    /**
+     * Tests if the {@see block_envf_slider::get_slide_at()} method returns valid  and useable image urls.
+     *
+     * @return void
+     * @covers \block_envf_slider::get_slide_at
+     */
+    public function test_get_slide_at() {
+        // We do not want to keep the get_image_url public, so we tweak the class for testing.
+        $blockref = new \ReflectionClass($this->block);
+        $getslidemethod = $blockref->getMethod('get_slide_at');
+        $getslidemethod->setAccessible(true);
+        $slide = $getslidemethod->invoke($this->block, 0);
+        $this->assertNotEmpty($slide);
+        $slidedata = $slide->export_for_template($this->block->page->get_renderer('core'));
+        $this->assertEquals('pexels-tom-dubois-17088081.jpg', basename($slidedata['image']));
+    }
+
+    /**
+     * Tests if the {@see block_envf_slider::config_is_valid()} method returns well true if the block's configuration is valid,
+     * and false if the block's configuration is not.
+     *
+     * @param \stdClass $config a block's configuration.
+     * @param bool $expectedresult whether the given block configuration is valid or not, to check if the method
+     * {@see block_envf_slider::config_is_valid()} returns the right value.
+     * @covers       \block_envf_slider::config_is_valid
+     * @dataProvider config_provider
+     * @return void
+     */
+    public function test_config_is_valid(\stdClass $config, bool $expectedresult) {
+        $this->block->config = $config;
+        self::assertEquals($expectedresult, $this->block->config_is_valid());
+    }
+
+    /**
+     * Tests the preg match expression to retrieve all the block configuration fields that relates to slides.
+     *
+     * @param string $string a string to test the pregmatch expression.
+     * @param bool $isrecognized wether or not the string should be recognized by the preg_match expression.
+     * @covers       \block_envf_slider\block_envf_slider_edit_form::delete_slide()
+     * @dataProvider preg_match_provider
+     * @return void
+     */
+    public function test_pregmatch_for_config_fields_in_editform(string $string, bool $isrecognized) {
+        $pregexpression = '/^slide_\S+/';
+        self::assertEquals($isrecognized, (bool) preg_match($pregexpression, $string));
     }
 
     /**
@@ -180,7 +193,6 @@ class block_envf_slider_test extends advanced_testcase {
      *
      *      "Wrong types (str)" => [
      *          (object)[
-     *              "slide_id" => ["im an id"],
      *              "slide_title" => ["title"],
      *              "slide_description" => ["description"],
      *              "slide_image" => ["4510"],
@@ -189,7 +201,6 @@ class block_envf_slider_test extends advanced_testcase {
      *      ],
      *      "Wrong types (int)" => [
      *          (object)[
-     *              "slide_id" => [0],
      *              "slide_title" => [0],
      *              "slide_description" => [0],
      *              "slide_image" => [0],
@@ -202,30 +213,12 @@ class block_envf_slider_test extends advanced_testcase {
     public function config_provider(): array {
         return [
             "Valid configuration" => [
-                (object)[
-                "slide_id" => [0],
-                "slide_title" => ["title"],
-                "slide_description" => ["description"],
-                "slide_image" => ["4510"],
-                "slide_whitetext" => [true]
-                ], true
-            ],
-            "Missing a field" => [
-                (object)[
+                (object) [
                     "slide_title" => ["title"],
                     "slide_description" => ["description"],
                     "slide_image" => ["4510"],
                     "slide_whitetext" => [true]
-                ], false
-            ],
-            "Not as many items for each element" => [
-                (object)[
-                    "slide_id" => [0],
-                    "slide_title" => ["title1", "title2"],
-                    "slide_description" => ["description"],
-                    "slide_image" => ["4510"],
-                    "slide_whitetext" => [true]
-                ], false
+                ], true
             ],
         ];
     }
@@ -237,14 +230,14 @@ class block_envf_slider_test extends advanced_testcase {
      */
     public function preg_match_provider() {
         return [
-            "valid1" => [ "slide_something", true ],
-            "valid2" => [ "slide_other", true ],
-            "slide plural" => [ "slides_something", false ],
-            "slide_ with nothing after" => [ "slide_", false ],
-            "slide_ in the middle" => [ "fjoisdf_slide_something", false ],
-            "slide in the end" => [ "something_slide_", false ],
-            "slide with nothing after" => [ "slide", false ],
-            "slide incomplete" => [ "sli", false ]
+            "valid1" => ["slide_something", true],
+            "valid2" => ["slide_other", true],
+            "slide plural" => ["slides_something", false],
+            "slide_ with nothing after" => ["slide_", false],
+            "slide_ in the middle" => ["fjoisdf_slide_something", false],
+            "slide in the end" => ["something_slide_", false],
+            "slide with nothing after" => ["slide", false],
+            "slide incomplete" => ["sli", false]
         ];
     }
 }

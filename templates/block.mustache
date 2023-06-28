@@ -34,23 +34,25 @@
         "slides":
         [
             {
-                "id": 0,
+                "index": 0,
                 "imageurl": "https://example.com",
                 "title": "A title",
                 "description": "A description",
                 "whitetext": "true"
             },
             {
-                "id": 1,
+                "index": 1,
                 "imageurl": "https://example.com",
                 "title": "A title",
                 "description": "A description",
                 "whitetext": "true"
             }
-        ]
+        ],
+        "maxheight": 250,
+        "autoplay": 5000
     }
 }}
-<div id="block-envf-slider-{{uniqid}}" class="glide block-envf-slider position-relative">
+<div id="block-envf-slider-{{uniqid}}" class="glide block-envf-slider position-relative" style="max-height: {{maxheight}}px">
 
     <!-- **** Start of Glide structure **** -->
     <div class="glide">
@@ -58,7 +60,7 @@
             <ul class="glide__slides">
                 {{#slides}}
                     <li class="glide__slide list-unstyled">
-                        {{< block_envf_slider/slide }}{{/ block_envf_slider/slide }}
+                        {{> block_envf_slider/slide }}
                     </li>
                 {{/slides}}
             </ul>
@@ -85,7 +87,7 @@
                 startAt: 0,
                 perView: 1,
                 gap: 0,
-                autoplay: 5000
+                autoplay: {{autoplay}}
             }
         );
     });

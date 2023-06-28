@@ -34,7 +34,7 @@
 
     Example context (json):
     {
-        "id": 0,
+        "index": 0,
         "title": "Title example",
         "description": "Description example",
         "imageurl": "https://example.com",
@@ -42,9 +42,9 @@
     }
 
 }}
-<div id="block-envf-slider-slide-{{id}}" class="slide-content" style="background-image: url({{image}});">
-    <div class="text-container{{#whitetext}} text-white{{/whitetext}}" >
-        <h3 class="title">{{title}}</h3>
-        <p class="description">{{description}}</p>
+<div id="block-envf-slider-slide-{{index}}" class="slide-content" style="background-image: url({{image}});">
+    <div class="text-container {{#whitetext}}text-white{{/whitetext}}" >
+        <h3 class="title text-center">{{title}}</h3>
+        <span class="description">{{{description}}}</span>
     </div>
 </div>
