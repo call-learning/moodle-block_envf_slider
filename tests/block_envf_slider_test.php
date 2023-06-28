@@ -79,8 +79,8 @@ class block_envf_slider_test extends advanced_testcase {
         $block = block_instance($blockname, $block->instance);
         $this->block = $block;
         $this->upload_files_in_block([
-            $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/stonks.jpg",
-            $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/phpstormlogo.png"
+            $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/pexels-tom-dubois-17088081.jpg",
+            $CFG->dirroot . "/blocks/envf_slider/tests/fixtures/openclipart-342997.png"
         ]);
     }
 

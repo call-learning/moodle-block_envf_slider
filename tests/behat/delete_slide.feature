@@ -16,12 +16,12 @@ Feature: Adding and deleting slides in ENVF slider block
     Given I press "Add more slides"
     And I set the field "Title slide 1" to "Test title 1"
     And I set the field "Description slide 1" to "Test description 1"
-    And I upload "blocks/envf_slider/tests/fixtures/stonks.jpg" file to "Image slide 1" filemanager
+    And I upload "blocks/envf_slider/tests/fixtures/pexels-tom-dubois-17088081.jpg" file to "Image slide 1" filemanager
 
     And I press "Add more slides"
     And I set the field "Title slide 2" to "Test title 2"
     And I set the field "Description slide 2" to "Test description 2"
-    And I upload "blocks/envf_slider/tests/fixtures/phpstormlogo.png" file to "Image slide 2" filemanager
+    And I upload "blocks/envf_slider/tests/fixtures/openclipart-342997.png" file to "Image slide 2" filemanager
 
     When I click on "<delete_slide_button_name>" "button"
 

@@ -32,18 +32,18 @@ Feature: Adding and configuring ENVF slider block
     And I press "Add more slides"
     And I set the field "Title slide 1" to "Test title 1"
     And I set the field "Description slide 1" to "Test description 1"
-    And I upload "blocks/envf_slider/tests/fixtures/stonks.jpg" file to "Image slide 1" filemanager
+    And I upload "blocks/envf_slider/tests/fixtures/pexels-tom-dubois-17088081.jpg" file to "Image slide 1" filemanager
     And I click on "White text for slide 1 ?" "checkbox"
 
     And I press "Add more slides"
     And I set the field "Title slide 2" to "Test title 2"
     And I set the field "Description slide 2" to "Test description 2"
-    And I upload "blocks/envf_slider/tests/fixtures/phpstormlogo.png" file to "Image slide 2" filemanager
+    And I upload "blocks/envf_slider/tests/fixtures/openclipart-342997.png" file to "Image slide 2" filemanager
     And I press "Save changes"
 
     Then I should see "Test title 1" in the "ENVF Slider" block
     And I should see "Test title 2" in the "ENVF Slider" block
     And I should see "Test description 1" in the "ENVF Slider" block
     And I should see "Test description 2" in the "ENVF Slider" block
-    And I should see the image "stonks.jpg" in the "ENVF Slider" envf slider block
-    And I should see the image "phpstormlogo.png" in the "ENVF Slider" envf slider block
+    And I should see the image "pexels-tom-dubois-17088081.jpg" in the "ENVF Slider" envf slider block
+    And I should see the image "openclipart-342997.png" in the "ENVF Slider" envf slider block
